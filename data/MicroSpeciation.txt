@@ -1,0 +1,16 @@
+Taxon	Appeared	Extinction	Richness
+Mammals	200	0	5416
+Birds	150	0	10500
+Angiosperms	130	0	295383
+Dinosaurs	245	66	700
+Sharks	450	0	440
+Primates	50	0	250
+Insects	400	0	900000
+Mollusks	545	0	85000
+Bony fish	510	0	28000
+Gymnosperm	390	0	1000
+Diatoms	175	0	100000
+Amphibians	370	0	7000
+Whales	50	0	90
+Ants	140	0	12000
+Microbes	4000	0	1E+12
