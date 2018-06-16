@@ -1,0 +1,78 @@
+---
+title: "Microbial speciation"
+author: "Jay T. Lennon"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+header-includes:
+  - \usepackage{array}
+output: pdf_document
+geometry: margin=2.54cm
+---
+
+# Setup Work Environment
+
+```{r}
+rm(list=ls())
+getwd()
+setwd("~/GitHub/MicroSpeciation/")
+
+# Load packages
+require("png")
+require("grid")
+````
+
+# Load data
+```{r}
+data <- read.table("data/MicroSpeciation.txt", sep = "\t", header = T)
+```
+
+# Calculations
+```{r}
+time <- data$Appeared - data$Extinction
+rate <- (log(data$Richness/1)/time)
+data <- data.frame(data, time, rate)
+data <- data[order(rate),] 
+```
+
+# Figure
+```{r}
+kern <- density(data$rate) 
+
+png(filename="figures/speciation-kernel.png",
+        width = 800, height = 800, res = 96*2)
+
+par(mar = c(4, 5, 1, 1))  
+
+plot(kern, main = NA, xaxt = "n", yaxt = "n", cex.lab = 1.5, ylab = "",
+     xlab = "", xlim = c(-0.05, 0.16), ylim = c(0,12), lwd = 2)
+
+mtext("Density", side = 2, outer = TRUE, cex = 1.5, 
+      line = -2, adj = 0.5)
+
+mtext(expression('Speciation Rate (mya'^-1*')'), side = 1, outer = TRUE, 
+      cex = 1.5, line = -1, adj = 0.5)
+
+     axis(side = 1, lwd.ticks = 2, cex.axis = 1.5, las = 1,
+        at = c(-0.05, 0.0, 0.05, 0.10, 0.15), labels = T)
+
+     axis(side = 3, lwd.ticks = 2, cex.axis = 1.5, las = 1,
+        at = c(-0.05, 0.0, 0.05, 0.10, 0.15), labels = F)
+
+     axis(side = 2, lwd.ticks = 2, cex.axis = 1.5, las = 1,
+        at = c(0, 4, 8, 12), labels = T)
+
+    axis(side = 4, lwd.ticks = 2, cex.axis = 1.5, las = 1,
+        at = c(0, 4, 8, 12), labels = F)
+
+box(lwd=2)
+
+arrows(0.006907755, 4, 0.006907755, 7, length = 0.075, lwd = 2, col = "Black")
+text(0.02, 3.5, labels = "microbes", cex = 1)
+
+# Close Plot Device
+dev.off()
+graphics.off()
+
+# Show Plot
+img <- readPNG("figures/speciation-kernel.png")
+grid.raster(img)
+```
