@@ -57,6 +57,9 @@ Sf.high <- 1 * exp(0.0313*4000)
 # What would substitution rate need to be to get 10^12 species? = 0.33
 micro.r * 48
 
+# What if substitution rate was a bit lower (0.3)? How sensitive?
+Sf.v.low <- 1 * exp((0.3/48)*4000)
+formatC(Sf.v.low, format = "e", digits = 2)
 ```
 
 # Figure
