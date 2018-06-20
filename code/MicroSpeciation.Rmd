@@ -1,9 +1,9 @@
 ---
-title: "Microbial speciation"
+title: "Microbial Speciation"
 author: "Jay T. Lennon"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 header-includes:
-  - \usepackage{array}
+   - \usepackage{array}
 output: pdf_document
 geometry: margin=2.54cm
 ---
@@ -22,51 +22,79 @@ require("grid")
 
 # Load data
 ```{r}
-data <- read.table("data/MicroSpeciation.txt", sep = "\t", header = T)
+data <- read.table("~/GitHub/MicroSpeciation/data/MicroSpeciation.txt", sep = "\t", header = T)
 ```
 
-# Calculations
-```{r}
-# Use exponetial function Sf = S0.e^rt, where Sf = species richness at time final,
-# So is speices richnness at time of origin which equals 1, r is the rate of 
-# speciation, and t is the amount of time between origin and final
+# Exponential approach
+Diversification involves the splitting of a lineage into two and so on, so by definition is an exponential process which has been used by evolutionary biologist to model speciation. We use the exponential function Sf = S0 * e^rt, where Sf = species richness at time final, So is speices richnness at time of origin which equals 1, r is the rate of speciation, and t is the amount of time between origin and final
 
+```{r}
 time <- data$Appeared - data$Extinction
 rate <- (log(data$Richness/1)/time)
 data <- data.frame(data, time, rate)
 data <- data[order(rate),] 
 micro <- data[ which(data$Taxon == 'Microbes'),]
 micro.r <- micro[,6]
+cat("Microbial speciation rate =", round(micro.r, 3), "per million years")
 
-# How does speciation rate estimated from exponential model and 10^12 compare to 
-# speciation rates estimate from the literature?
 
-# Define a speciation event based on time it takes for 16S gene with length 1600 bp 
-# to accumulate enough substitutions so gene is 3% divergent. 
-# Number of substitutions needed is 1600 * 0.03 = 48
-# Kuo and Ochman (2009) report substitution rates of 0.4 - 1.5 per million yrs.
-# Corresponding times to divergence are 32 (48/1.5) to 120 (48/0.4) million yr. 
-# With speciation rates of 0.008 (1/120) to 0.0313 (1/32) per million yr.
-# Lower range is very close to estimates from the exponetial model = 0.007 per million yr.
-# With low speciation estimate, plugged into exponential model = 7.8 * 10^13
-Sf.low <- 1 * exp(0.008*4000)
+# To see if this approach is reasonable, it would be interesting to compare (correlation) 
+# literature-reported estimates of diversification for plants and animals with estimates from 
+# the exponential model. Perhaps use data from Scholl and Weins (2016)
+```
 
-# With high speciation estimate, plugged into exponential model = 2.4 * 10^54
-Sf.high <- 1 * exp(0.0313*4000)
+# Comparison with substitution-based diversification estimates
+We can define a speciation event based on the time it takes for 16S rRNA gene of a given length to accumulate enough substitutions so that there is 3 % divergence. We can that put the corresponding speciation rate back into the exponential and see what levels of richness are predicted. 
 
-# What would substitution rate need to be to get 10^12 species? = 0.33
-micro.r * 48
+```{r}
+length.g <- 1600 # length of gene
+cutoff <- 0.03 # % divergence for new OTU
+subs = length.g * cutoff # number of substitutions needed for new OTU
+
+# Substitution rates (per million years) from Kuo and Ochman (2009):
+low.sub <- 0.4
+hi.sub <- 1.5
+
+# Corresponding divergence time (million years):
+div.t.ls <- subs / low.sub # divergence time w/ low substitution rate
+div.t.hs <- subs / hi.sub # divergence time w/ high substitution rate
+
+# Corresponding speciation rates (million years):
+spec.ls <- 1 / div.t.ls
+spec.hs <- 1 / div.t.hs
+
+cat("Speciation rates range from", round(spec.ls, 3), "to", round(spec.hs, 3), "per million years") 
+
+# Let's plug these speciation rates back into the exponential model:
+mic.yrs <- 4000 # millions of years of microbial evolution
+Sf.ls <- 1 * exp(spec.ls*mic.yrs)
+Sf.hs <- 1 * exp(spec.hs*mic.yrs)
+
+cat("Speciation rates from literature overshoot global Sobs:", formatC(Sf.ls, format = "e", digits = 2), "-", formatC(Sf.hs, format = "e", digits = 2)) 
+
+# What would substitution rate need to be to get 10^12 species with exponential model?
+right.sub <- micro.r * 48 # 0.33
 
 # What if substitution rate was a bit lower (0.3)? How sensitive?
-Sf.v.low <- 1 * exp((0.3/48)*4000)
+Sf.v.low <- 1 * exp(((right.sub - 0.03) /subs)*mic.yrs)
+
+Sf.v.low <- 1 * exp(((right.sub - 0.03)/subs)*mic.yrs)
 formatC(Sf.v.low, format = "e", digits = 2)
+```
+
+# What about a logistic model?
+In population biology, a logistic model modifies exponential growth rate based on a carrying capacity. We don't konw what the upper limit for species richness on Earth is. Perhaps it's 10^12 or 10^16. It however, cannot be 10^54 as calculated above with fast substitution rates as this would exceed the presumed equilibrium abundance (N) of the biosphere which is thought to be ~10^30. In calculations below, we will solve for richness with the following equation Sf = (K * So * e^rt) / (K + So (e^rt -1))
+
+```{r}
+K <- 10^14
+SF.log <- (K * 1 * exp(spec.hs * mic.yrs)) / (K + 1 * exp(spec.hs * mic.yrs -1))
 ```
 
 # Figure
 ```{r}
 kern <- density(data$rate) 
 
-png(filename="figures/speciation-kernel.png",
+png(filename="~/GitHub/MicroSpeciation/figures/speciation-kernel.png",
         width = 800, height = 800, res = 96*2)
 
 par(mar = c(4, 5, 1, 1))  
@@ -102,6 +130,6 @@ dev.off()
 graphics.off()
 
 # Show Plot
-img <- readPNG("figures/speciation-kernel.png")
+img <- readPNG("~/GitHub/MicroSpeciation/figures/speciation-kernel.png")
 grid.raster(img)
 ```
