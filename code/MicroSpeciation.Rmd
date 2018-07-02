@@ -133,3 +133,26 @@ graphics.off()
 img <- readPNG("~/GitHub/MicroSpeciation/figures/speciation-kernel.png")
 grid.raster(img)
 ```
+
+# Comparison of Exponential and Phylogenetic Estimates of Speciation
+```{r}
+
+```{r}
+data.speciation <- read.table("~/GitHub/MicroSpeciation/data/Sholl_Wiens_2016.txt", sep = "\t", header = T)
+
+exp.rate <- (log(data.speciation$richness/1)/data.speciation$age)
+
+plot(data.speciation$e.div.0, exp.rate)
+points(data.speciation$e.div.5, exp.rate, col = "red")
+points(data.speciation$e.div.9, exp.rate, col = "blue")
+
+plot(exp.rate,data.speciation$e.div.0, col = "green", ylab = "", xlab = "")
+points(exp.rate, data.speciation$e.div.5, col = "red")
+points(exp.rate, data.speciation$e.div.9, col = "blue")
+points(exp.rate, exp.rate, type = "l", col = "black")
+mtext("speciation rate (S & W 2016)", side = 2, outer = TRUE, cex = 1.5, 
+      line = -2, adj = 0.5)
+mtext("speciation rate (exponential)", side = 1, outer = TRUE, cex = 1.5, 
+      line = -2, adj = 0.5)
+```
+
