@@ -71,7 +71,7 @@ colnames(rich) <- c("time", "mya", "E.per.b", "E.per.e", "E.per.tot", "E.b.rich"
 
 ```{r}
 png(filename="~/GitHub/MicroSpeciation/figures/logistic.richness.png",
-        width = 800, height = 800, res = 96*2)
+        width = 1200, height = 800, res = 96*2)
 
 layout(matrix(c(1:2), byrow = T))
 par(mar = c(0.5, 4, 1, 1), oma = c(3, 4, 1, 1))
@@ -83,22 +83,22 @@ points(rich$mya, rich$E.per.e, type = "l", col = "blue", lwd = 2)
 
 box(lwd = 2)
 
-axis(side = 2, lwd.ticks = 2, cex.axis = 1.5, las = 1,
+axis(side = 2, lwd.ticks = 2, cex.axis = 1.25, las = 1,
     labels = T, at = c(0, 25, 50, 75))
 
-axis(side = 4, lwd.ticks = 2, cex.axis = 1.5, las = 1,
+axis(side = 4, lwd.ticks = 2, cex.axis = 1.25, las = 1,
    labels = F, at = c(0, 25, 50, 75))
 
-axis(side = 1, lwd.ticks = 2, cex.axis = 1.5 , las = 1,
+axis(side = 1, lwd.ticks = 2, cex.axis = 1.25 , las = 1,
     labels = F, at = c(4000, 400, 40, 1))
 
-axis(side = 3, lwd.ticks = 2, cex.axis = 1.5, las = 1,
+axis(side = 3, lwd.ticks = 2, cex.axis = 1.25, las = 1,
     at = c(4000, 400, 40, 1), labels = F)
 
 mtext(side = 2, "Extinction (%)", line = 3, cex = 1.5)
 #mtext(side = 1, "Time (mya)", line = 3.5, cex = 1.5)
 
-legend(10, 65, c("mass", "baseline"), lty = c(2,2), col = c("blue", "red"),
+legend(15, 65, c("mass", "baseline"), lty = c(2,2), col = c("blue", "red"),
        lwd = 2.5, seg.len = 2, bty = 'n', pt.cex = 2)
 
 # Richness panel
@@ -108,27 +108,34 @@ points(rich$mya, rich$S, type = "l", col = "blue", lwd = 2)
 
 box(lwd = 2)
 
-axis(side = 2, lwd.ticks = 2, las = 1, cex.axis = 1.5, 
-   labels = c("2", "4", "6", "8", "10", "12"), 
-   at = c(10^2, 10^4, 10^6, 10^8, 10^10, 10^12))
+axis(side = 2, lwd.ticks = 2, las = 1, cex.axis = 1.25, 
+   labels = c("0", "4", "8", "12"), 
+   at = c(10^0, 10^4, 10^8, 10^12))
 
-axis(side = 4, lwd.ticks = 2, cex.axis = 1.5, las = 1,
-   labels = F, at = c(10^2, 10^4, 10^6, 10^8, 10^10, 10^12))
+axis(side = 4, lwd.ticks = 2, cex.axis = 1.25, las = 1,
+   labels = F, at = c((10^0, 10^4, 10^8, 10^12))
 
-axis(side = 1, lwd.ticks = 2, cex.axis = 1.5 , las = 1,
+axis(side = 1, lwd.ticks = 2, cex.axis = 1.25 , las = 1,
     labels = T, at = c(4000, 400, 40, 1))
 
-axis(side = 3, lwd.ticks = 2, cex.axis = 1.5, las = 1,
+axis(side = 3, lwd.ticks = 2, cex.axis = 1.25, las = 1,
     at = c(4000, 400, 40, 1), labels = F)
 
 mtext(side = 1, "Time (mya)", line = 2.5, cex = 1.5)
-mtext(side = 2, "Richness", line = 3, cex = 1.5)
+mtext(side = 2, "log10(Richness)", line = 3, cex = 1.5)
 
-legend(10, 10^6, c("extant", "extinct"), lty = c(2,2), col = c("red", "blue"),
+legend(15, 10^6, c("extant", "extinct"), lty = c(2,2), col = c("red", "blue"),
        lwd = 2.5, seg.len = 2, bty = 'n', pt.cex = 2)
 
 
+# Close Plot Device
+dev.off()
+graphics.off()
 
+# Show Plot
+img <- readPNG("~/GitHub/MicroSpeciation/figures/logistic.richness.png")
+grid.raster(img)
+````
 
 
 # Mass extinction
