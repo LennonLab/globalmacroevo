@@ -1,0 +1,140 @@
+---
+title: "Microbial Speciation – Background Extinction Only"
+author: "Ford Fishman"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+header-includes:
+   - \usepackage{array}
+output: pdf_document
+geometry: margin=2.54cm
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Setup Work Environment
+
+```{r}
+rm(list=ls()) # removes all objects in the given environment
+wd <- "~/Documents/LennonLab/GitHub/MicroSpeciation"
+data_file <- paste(wd, "/data/MicroSpeciation.txt", sep = "")
+figure_dir <- paste(wd, "/figures/", sep = "")
+getwd()
+setwd(wd)
+
+# Load packages
+require("png")
+require("grid")
+suppressPackageStartupMessages(library(ggplot2))
+suppressPackageStartupMessages(library(tidyr))
+suppressPackageStartupMessages(library(scales))
+suppressPackageStartupMessages(library(viridis))
+suppressPackageStartupMessages(library(kableExtra))
+suppressPackageStartupMessages(library(knitr))
+```
+
+
+## Code taken from MicroSpeciation.Rmd
+```{r}
+length.g <- 1600 # length of gene
+cutoff <- 0.03 # % divergence for new OTU
+subs = length.g * cutoff # number of substitutions needed for new OTU
+
+# Substitution rates (per million years) from Kuo and Ochman (2009):
+low.sub <- 0.4
+hi.sub <- 1.5
+
+# Corresponding divergence time (million years):
+div.t.ls <- subs / low.sub # divergence time w/ low substitution rate
+div.t.hs <- subs / hi.sub # divergence time w/ high substitution rate
+
+# Corresponding speciation rates (million years):
+lambda_low <- 1 / div.t.ls
+lambda_high <- 1 / div.t.hs
+
+# inverse of divergence times
+cat("Speciation rates range from", round(lambda_low, 3), "to", round(lambda_high, 3), "per million years") 
+
+# Let's plug these speciation rates back into the exponential model:
+mic.yrs <- 4000 # millions of years of microbial evolution
+# mic.yrs <- micro$time # alternate, avoid code duplication
+Sf.ls <- 1 * exp(lambda_low*mic.yrs)
+Sf.hs <- 1 * exp(lambda_high*mic.yrs)
+
+cat("\nSpeciation rates from literature overshoot global Sobs:", formatC(Sf.ls, format = "e", digits = 2), "-", formatC(Sf.hs, format = "e", digits = 2)) 
+```
+
+## Static Extinction:Speciation Ratio 
+```{r}
+S0 <- 1 # initial species #
+t <- 4000 # time 
+# set epsilon values
+eps <- c(low = 0.1, mid = 0.5, high = 0.9) 
+# set a range of speciation values in potential range
+lambdas <- seq(low.sub, hi.sub, by = 0.001)/subs 
+# extinction rates for each speciation value and epsilon value
+mus.low <- eps["low"] * lambdas
+mus.mid <- eps["mid"] * lambdas
+mus.high <- eps["high"] * lambdas
+# corresponding set of diversification rates
+r.low <- lambdas - mus.low
+r.mid <- lambdas - mus.mid
+r.high <- lambdas - mus.high
+
+# calculate final population levels with basic model
+pop.low <- S0 * exp(r.low * 4000)
+pop.mid <- S0 * exp(r.mid * 4000)
+pop.high <- S0 * exp(r.high * 4000)
+
+# summary stats
+sum_stats <- cbind(pop0.1 = summary(pop.low), pop0.5 = summary(pop.mid), pop0.9 = summary(pop.high))
+colnames(sum_stats) <- c("0.1", "0.5", "0.9")
+sum_stats_file <- paste(figure_dir, "static-rates.html", sep = "")
+sum_stats %>%
+  kable() %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = F) %>%
+  add_header_above(c(" ", "Epsilon" = 3)) %>% 
+  save_kable(file = sum_stats_file, self_contained = T)
+
+# write.table(sum_stats, file = sum_stats_file, sep = ",", quote = FALSE, row.names = T)
+
+# make data frame
+static_vals <- data.frame(lambda = lambdas, pop.1= pop.low, pop.5 = pop.mid, pop.9 = pop.high)
+static_vals_long <- gather(static_vals, key = epsilon, value = projectedrichness, pop.1, pop.5, pop.9)
+static_vals_long$epsilon <- gsub(pattern = "pop", replacement = "0", x = static_vals_long$epsilon)
+
+# plots
+# ggplot(static_vals_long, aes(x = epsilon, y = projectedrichness)) +
+#   geom_boxplot() +
+#   scale_y_log10()
+
+line_plot_file <- paste(figure_dir, "speciation-static-eps.png", sep = "")
+png(filename = line_plot_file,
+        width = 800, height = 800, res = 96*2)
+par(mar = c(4, 5, 1, 1))  
+
+ggplot(static_vals_long, aes(x = lambda, y = projectedrichness, color = epsilon)) +
+  geom_line() + 
+  scale_x_continuous("Speciation rate (Species/Million Years)")+
+  scale_y_log10("Expected Contemporary Richness", breaks = trans_breaks("log10", function(x) 10^x),
+              labels = trans_format("log10", math_format(10^.x))) +
+  scale_color_viridis("Epsilon", discrete = T) +
+      theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        legend.position = "bottom",
+        axis.line = element_line(colour = "black"))
+# Close Plot Device
+dev.off()
+graphics.off()
+
+# Show Plot
+img <- readPNG(line_plot_file)
+grid.raster(img)
+```
+
+
+# Load data
+```{r}
+data <- read.table(data_file, sep = "\t", header = T) 
+```
