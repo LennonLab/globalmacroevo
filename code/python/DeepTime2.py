@@ -51,10 +51,10 @@ for i in range(40000):
     r = uniform(0.002, 0.03)
     rs.append(r)
 
-    Eb = 10**uniform(-3, 0)
+    Eb = 10**uniform(-3, 0) # epsilon
     Ebs.append(np.log10(Eb))
 
-    Eb = Eb*r
+    Eb = Eb*r # convert epsilon to mu
     K = uniform(0, 1)
     Ks.append(np.log10(K))
 
