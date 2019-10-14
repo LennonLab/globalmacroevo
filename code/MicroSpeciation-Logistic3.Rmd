@@ -107,7 +107,7 @@ for (i in 1:nrow(df)) {
   
   S <- 1 # initial number of species
   r <- df$r[i] # initial r for this iteration
-  lambda <- df$SpeciationRate[i]
+  lambda <- 0.012
   # Extinction parameters
   ep <- df$epsilon[i]
   Eb <- rnorm(4000, mean = ep, sd = 0.05) # baseline epsilon
@@ -116,7 +116,7 @@ for (i in 1:nrow(df)) {
   # Richness with discrete logistic with extinction
   for(time in 2:4000) {
     epsilon = Eb[time]
-    mu <- lambda * epsilon 
+    mu <- lambda * 0.1 
     r <- lambda - mu # diversification rate update 
     S[time] = (S[time-1] + (S[time-1]*r) * (1-S[time-1]/K)) * (1 - Ee[time]) # growth
   }

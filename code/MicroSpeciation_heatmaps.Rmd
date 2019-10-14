@@ -34,8 +34,8 @@ suppressPackageStartupMessages(library(viridis))
 rounding_scheme <- function(S){
   logS <-  log10(S)
   # roundS <- ifelse(logS > 30, 30, logS) # Anything >10^30 is one color
-  roundS <- ifelse(logS > 20, 20, logS) # Anything <10^30 and >10^20 is another color
-  roundS <- ifelse(roundS < 0, 0, roundS) # can't be less than 0
+  roundS <- ifelse(logS > 23, 23, logS) # Anything <10^30 and >10^20 is another color
+  roundS <- ifelse(roundS < 4, 4, roundS) # can't be less than 0
   roundS <- floor(roundS) # round down order of magnitude
   return(data.frame(logS, roundS))
 }
@@ -58,7 +58,7 @@ df1 <- cbind(df1, rounding_scheme(S))
 # heatmap made from scatter plot
 (p1 <- ggplot(data = df1, aes(x = lambda, y = epsilon, color = roundS)) + 
   geom_point(size = 1.8) +
-  xlab(expression(lambda*" (Species/My)")) +
+  xlab(expression(lambda*" (Species/Myr)")) +
   scale_y_continuous(expression(epsilon), breaks = c(0.1, 0.3, 0.5, 0.7, 0.9)) +
   scale_color_viridis("Log(Richness)") +
   theme(panel.grid.major = element_blank(), 
@@ -100,7 +100,7 @@ df2 <- cbind(df2, rounding_scheme(S))
 # heatmap 2
 (p2 <- ggplot(data = df2, aes(x = lambda, y = epsilon, color = roundS)) + 
   geom_point(size = 1.8) +
-  xlab(expression(lambda*" (Species/My)")) +
+  xlab(expression(lambda*" (Species/Myr)")) +
   scale_y_continuous(expression(epsilon), breaks = c(0.1, 0.3, 0.5, 0.7, 0.9)) +
   scale_color_viridis("Log(Richness)") +
   theme(panel.grid.major = element_blank(), 
@@ -154,16 +154,23 @@ for (i in 1:nrow(ext)){
         
         # integer(x) makes a vector of zeros of length x
         # the mean of extinction intensity is evenly distributed over an era's duration
-        avg_ext <- c(avg_ext, integer(length(era)) + mean(era)/length(era))
+        # avg_ext <- c(avg_ext, integer(length(era)) + mean(era)/length(era))
+        a <- integer(length(era))
+        a[length(a)] <- mean(era)
+        avg_ext <- c(avg_ext, a)
       }
       
     } else { # if a new era is beginning
       # Add previous era into vector
-      avg_ext <- c(avg_ext, integer(length(era)) + mean(era)/length(era))
+      a <- integer(length(era))
+      a[length(a)] <- mean(era)
+      avg_ext <- c(avg_ext, a)
       era <- c(ext$ExtinctionIntensity[i]) # begin recording new era
       
       if (i == nrow(ext)) { # if the last entry is part of another era
-        avg_ext <- c(avg_ext, integer(length(era)) + mean(era)/length(era))
+        a <- integer(length(era))
+        a[length(a)] <- mean(era)
+        avg_ext <- c(avg_ext, a)
       }
     }
   }
@@ -214,7 +221,7 @@ df3 <- cbind(df3, rounding_scheme(S))
 # heatmap 3
 (p3 <- ggplot(data = df3, aes(x = lambda, y = epsilon, color = roundS)) + 
   geom_point(size = 1.8) +
-  xlab(expression(lambda*" (Species/My)")) +
+  xlab(expression(lambda*" (Species/Myr)")) +
   scale_y_continuous(expression(epsilon), breaks = c(0.1, 0.3, 0.5, 0.7, 0.9)) +
   scale_color_viridis("Log(Richness)") +
   theme(panel.grid.major = element_blank(), 
@@ -227,5 +234,37 @@ fig3_dir <- paste(figure_dir, "LambdaVSEpsilon_EeVariableRatesHeatmap.png", sep 
 ggsave(plot = p3, filename = fig3_dir, width = 7, height = 5)
 ```
 
+```{r}
+### CONSTANT MEDIAN EXTINCTION EVENT
+
+lambda <- runif(n = 40000, min = 0.008, max = 0.031) # speciation rates
+S <- integer(length = 40000) + 1 # keeps track of species for each set of parameters
+EeStart <- as.integer(names(avg_ext[1])) # first year with data
+
+# Simulate, but replace random background extinction levels 
+# with "known" extinction rates for macroorganisms for "recent" years
+for(t in 2:4000) {
+  ep <- median(avg_ext)
+  r <- lambda # diversification rate is just lambda
+  S <- S * exp(r)* (1 - ep) # ep % of population dies
+}
+
+df4 <- data.frame(lambda, r, S)
+df4 <- cbind(df4, rounding_scheme(S))
+
+```
+
+```{r}
+(p4 <- ggplot(data = subset(df4), aes(y = roundS, x = lambda)) + 
+  geom_point() +
+  xlab(expression(lambda*" (Species/Myr)")) +
+  scale_color_viridis("Log(Richness)") +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        legend.position = "right",
+        axis.line = element_blank())
+)
+```
 
 
