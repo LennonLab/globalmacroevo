@@ -19,7 +19,7 @@ require("ggplot2")
 require("viridis")
 
 species <- list("0.1" = double(4000), "0.5" = double(4000), "0.9" = double(4000))
-species$`0.9`[1] = 1.0
+species$`0.1`[1] = 1.0
 S_total <- double(4000)
 S_total[1] <- 1.0
 lambda <- 0.025
@@ -27,18 +27,18 @@ epsilon <- c(0.1, 0.5, 0.9)
 mu <- epsilon * lambda
 r <- lambda - mu
 timestep <- function(species, S_total, i){
-  species$`0.1`[i] <-  0.015 * species$`0.5`[i-1] * (r[2]) +
+  species$`0.1`[i] <-  0.05 * species$`0.5`[i-1] * (r[2]) +
     0.97 * species$`0.1`[i-1] * (r[1]) +
-    0.02 * species$`0.9`[i-1] * (r[3]) +
+    0.05 * species$`0.9`[i-1] * (r[3]) +
     0.95* species$`0.1`[i-1]
-  species$`0.5`[i] <-  0.97 * species$`0.5`[i-1] * (r[2]) +
+  species$`0.5`[i] <-  0.90 * species$`0.5`[i-1] * (r[2]) +
     0.0 * species$`0.1`[i-1] * (r[1]) +
-    0.04 * species$`0.9`[i-1] * (r[3]) +
+    0.05 * species$`0.9`[i-1] * (r[3]) +
     0.95 *species$`0.5`[i-1] +
     0.04 * species$`0.1`[i-1]
-  species$`0.9`[i] <-  0.015 * species$`0.5`[i-1] * (r[2]) +
+  species$`0.9`[i] <-  0.05 * species$`0.5`[i-1] * (r[2]) +
     0 * species$`0.1`[i-1] * (r[1]) +
-    0.94 * species$`0.9`[i-1] * (r[3]) +
+    0.90 * species$`0.9`[i-1] * (r[3]) +
     species$`0.9`[i-1] +
     0.05 *species$`0.5`[i-1] +
     0.01 * species$`0.1`[i-1]
