@@ -58,7 +58,7 @@ dfS12 <- data.frame(lambda, epsilon, prob = pgf(0.385*10^12, 3.43*10^12))
 
 
 # Probability of being in range for Louca et al. 2019
-dfS6 <- data.frame(lambda, epsilon, prob = pgf(0.22*10^6, 4.3*10^6))
+dfS6 <- data.frame(lambda, epsilon, prob = pgf(2.2*10^6, 4.3*10^6))
 (pS6 <- probPlot(dfS6))
 
 df6_12 <- data.frame(lambda, epsilon, prob = dfS12$prob + dfS6$prob)
@@ -69,3 +69,43 @@ variance <- (lambda + mu)/(lambda - mu) * exp((lambda - mu)*Time)*(exp((lambda -
 expectS <- exp(r * Time)
 dfvar <- data.frame(lambda, epsilon, prob = (variance)^0.5/expectS)
 (pvar <- probPlot(dfvar))
+
+# Confidence intervals
+# lambda <- 0.015
+# mu <- 0.007
+r <- lambda - mu
+beta <- (exp(r*Time)-1)/(exp(r*Time) - mu/lambda)
+P_greater <- function(k) {
+  return(beta^(k-1))
+}
+P_lower <- function(k) {
+  return(1 - beta^(k-1))
+}
+
+stillRoundingLow = TRUE
+stillRoundingHigh = TRUE
+klow <- 0
+khigh <- 10^100
+ks <- double(sims)
+CIs <- function()
+while (stillRoundingLow|stillRoundingHigh) {
+  k <- runif(n = 1,min = 1, max = 10) * 10 ^runif(n=1, 5, 23)
+  if (stillRoundingLow&stillRoundingHigh){
+    lower <- P_greater(k)
+    upper <- P_lower(k)
+    stillRoundingLow <- ifelse(round(lower, digits = 3)==0.975,FALSE,TRUE)
+    stillRoundingHigh <- ifelse(round(upper, digits = 3)==0.975,FALSE,TRUE)
+    klow <- ifelse(!stillRoundingLow,k,klow)
+    khigh <- ifelse(!stillRoundingHigh,k,khigh)
+  } else if(stillRoundingHigh){
+    upper <- P_lower(k)
+    stillRoundingHigh <- ifelse(round(upper, digits = 3)==0.975,FALSE,TRUE)
+    khigh <- ifelse(!stillRoundingHigh,k,khigh)
+  } else{
+    lower <- P_greater(k)
+    stillRoundingLow <- ifelse(round(lower, digits = 3)==0.975,FALSE,TRUE)
+    klow <- ifelse(!stillRoundingLow,k,klow)
+  }
+}
+klow
+khigh
