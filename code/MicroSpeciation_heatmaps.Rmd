@@ -17,7 +17,7 @@ data_dir <- paste(wd, "/data/", sep = "")
 figure_dir <- paste(wd, "/figures/", sep = "")
 getwd()
 setwd(wd)
-
+source("code/functions.R")
 # Load packages
 require("png")
 require("grid")

@@ -15,7 +15,7 @@
 
 ## SETUP ENVIRONMENT
 rm(list=ls()) # removes all objects in the given environment
-wd <- "~/Documents/LennonLab/GitHub/MicroSpeciation"
+wd <- "~/GitHub/MicroSpeciation"
 data_dir <- paste(wd, "/data/", sep = "")
 figure_dir <- paste(wd, "/figures/", sep = "")
 getwd()

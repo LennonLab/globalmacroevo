@@ -103,7 +103,15 @@ importRohdeMuller <- function(path = paste(data_dir, "Extinction_Rohde_Muller_ra
   return(list(original=original,peak_ext=peak_ext,avg_ext=avg_ext,era_lengths=era_lengths,era_means=era_means))
 }
 
-
+## Used for binning into colors for heatmap
+rounding_scheme <- function(S){
+  logS <-  log10(S)
+  # roundS <- ifelse(logS > 30, 30, logS) # Anything >10^30 is one color
+  roundS <- ifelse(logS > 23, 23, logS) # Anything <10^30 and >10^20 is another color
+  roundS <- ifelse(roundS < 4, 4, roundS) # can't be less than 0
+  roundS <- floor(roundS) # round down order of magnitude
+  return(data.frame(logS, roundS))
+}
 
 ## Transformation for plot
 magnify_trans <- function(intercept, reducer) {
