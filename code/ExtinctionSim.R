@@ -93,10 +93,10 @@ for(i in 1:a){
 }
 
 # plot the simulated extinction levels with the actual extinction data
-ggplot(NULL, aes(x=1:4000,y=c(extinction_max, original*100))) + 
+ggplot(NULL, aes(x=4000:1,y=c(extinction_max, original*100))) + 
   geom_line()+
-  geom_vline(xintercept = EeStart, linetype = "dashed", color = "red") +
-  xlab("Time (My)") +
+  geom_vline(xintercept = 4000 - EeStart, linetype = "dashed", color = "red") +
+  scale_x_reverse("Time (Mya)") +
   ylab("Extinction Intensity (%)") +
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),

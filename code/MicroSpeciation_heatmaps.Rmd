@@ -43,9 +43,9 @@ rounding_scheme <- function(S){
 
 
 ```{r}
-lambda <- runif(n = 40000, min = 0.008, max = 0.031) # speciation rates
+lambda <- runif(n = 400000, min = 0.008, max = 0.031) # speciation rates
 # epsilon <- 10^runif(n = 40000, min = -1, max = -0.05) # mu/lambda
-epsilon <- runif(n = 40000, min = 0.1, max = 0.9) # mu/lambda
+epsilon <- runif(n = 400000, min = 0.1, max = 0.9) # mu/lambda
 mu <- lambda * epsilon # extinction rates
 r <- lambda - mu # diversification rate
 S0 <- 1
@@ -58,14 +58,63 @@ df1 <- cbind(df1, rounding_scheme(S))
 # heatmap made from scatter plot
 (p1 <- ggplot(data = df1, aes(x = lambda, y = epsilon, color = roundS)) + 
   geom_point(size = 1.8) +
-  xlab(expression(lambda*" (Species/Myr)")) +
-  scale_y_continuous(expression(epsilon), breaks = c(0.1, 0.3, 0.5, 0.7, 0.9)) +
+  scale_x_continuous(expression(lambda*" (Species/Myr)"),expand = c(0,0)) +
+  scale_y_continuous(expression(epsilon), 
+                     limits = c(0.1, 0.9),
+                     breaks = c(0.1, 0.3, 0.5, 0.7, 0.9), 
+                     expand = c(0,0)) +
   scale_color_viridis("Log(Richness)") +
-  theme(panel.grid.major = element_blank(), 
+  theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.background = element_blank(),
+        axis.text = element_text(size = 11),
+        axis.ticks = element_line(size = 1),
+        axis.ticks.length = unit(5,"pt"),
         legend.position = "right",
-        axis.line = element_blank())
+        axis.line = element_blank(),
+        )
+)
+df_12 <- subset(df1, roundS == 12)
+df_6 <- subset(df1, roundS == 6)
+(pPres1 <- ggplot(data = df1, aes(x = lambda, y = epsilon, color = roundS)) + 
+  geom_point(size = 1.8) +
+  scale_x_continuous(expression(lambda*" (Species/Myr)"),expand = c(0,0)) +
+  scale_y_continuous(expression(epsilon), 
+                     limits = c(0.1, 0.9),
+                     breaks = c(0.1, 0.3, 0.5, 0.7, 0.9), 
+                     expand = c(0,0)) +
+  scale_color_viridis("Log(Richness)") +
+  geom_point(data = df_12, aes(x = lambda, y = epsilon), size = 1.8, color = "grey") +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        axis.text = element_text(size = 11),
+        axis.ticks = element_line(size = 1),
+        axis.ticks.length = unit(5,"pt"),
+        legend.position = "right",
+        axis.line = element_blank(),
+        )
+)
+
+(pPres2 <- ggplot(data = df1, aes(x = lambda, y = epsilon, color = roundS)) + 
+  geom_point(size = 1.8) +
+  scale_x_continuous(expression(lambda*" (Species/Myr)"),expand = c(0,0)) +
+  scale_y_continuous(expression(epsilon), 
+                     limits = c(0.1, 0.9),
+                     breaks = c(0.1, 0.3, 0.5, 0.7, 0.9), 
+                     expand = c(0,0)) +
+  scale_color_viridis("Log(Richness)") +
+  geom_point(data = df_12, aes(x = lambda, y = epsilon), size = 1.8, color = "azure") +
+  geom_point(data = df_6, aes(x = lambda, y = epsilon), size = 1.8, color = "azure") +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        axis.text = element_text(size = 11),
+        axis.ticks = element_line(size = 1),
+        axis.ticks.length = unit(5,"pt"),
+        legend.position = "right",
+        axis.line = element_blank(),
+        )
 )
 # Save figure
 fig1_dir <- paste(figure_dir, "LambdaVSEpsilon_ConstantRatesHeatmap.png", sep = "")

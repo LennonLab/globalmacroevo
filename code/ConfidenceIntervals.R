@@ -6,7 +6,7 @@
 
 ## SETUP ENVIRONMENT
 rm(list=ls())
-wd <- "~/Documents/LennonLab/GitHub/MicroSpeciation"
+wd <- "~/GitHub/MicroSpeciation"
 data_dir <- paste(wd, "/data/", sep = "")
 figure_dir <- paste(wd, "/figures/", sep = "")
 getwd()
@@ -112,19 +112,21 @@ df$CI6 <- !(klows<low6 & khighs<low6) & !(klows>high6 & khighs>high6)
 
 df1 <- subset(df, !is.na(CI6)) # remove NAs
 df1$CI <- ifelse(df1$CI12,"CI12",ifelse(df1$CI6,"CI6","none")) # categorize simulations
-
+df2 <- subset(df1, CI != "CI6")
 # plot figure
-p1 <- ggplot(data = df1, aes(x = lambda, y = epsilon, color = CI)) + 
+(p1 <- ggplot(data = df2, aes(x = lambda, y = epsilon, color = CI)) + 
   geom_point(size = 1.4) +
   xlab(expression(lambda*" (Species/Myr)")) +
   scale_y_continuous(expression(epsilon), breaks = c(0.1, 0.3, 0.5, 0.7, 0.9)) +
   scale_color_manual(breaks = c("CI6","CI12","none"),
-                     values = c("dodgerblue3","mediumseagreen","darkslategrey")) +
+                     # values = c("dodgerblue3","mediumseagreen","black"), # colors for including Louca data
+                     values = c("dodgerblue3","black"),
+                     labels = c(expression(paste(10^6)),expression(paste(10^12)),"none")) +
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
-        panel.background = element_blank(),
+        panel.background = element_rect(fill = 'black'),
         legend.position = "right",
-        axis.line = element_blank())
+        axis.line = element_blank()))
 # Save figure
 fig_dir <- paste(figure_dir, "ConfidenceIntervals.png", sep = "")
 ggsave(plot = p1, filename = fig_dir, width = 7, height = 5)

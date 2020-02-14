@@ -60,10 +60,10 @@ df <- data.frame(logrichness = c(log10(S1), log10(S2), log10(S3),log10(S4)), tim
 (p1 <- ggplot(data = df, aes(y = logrichness, x = time, group = as.character(relative))) + 
   geom_line(aes(linetype = as.character(relative),color = "Richness")) +
   geom_line(aes(y=extinction*30,color = "Extinction")) +
-  scale_x_reverse("Time (Myr)",limits = c(800,0)) +
+  scale_x_reverse("Time (Mya)",limits = c(800,0)) +
   scale_y_continuous("Log(Richness)", breaks = seq(0,32,4), expand = c(0,0),
                      sec.axis = sec_axis(~./30, name = "Extinction Event Intensity",labels = percent) ) +
-  scale_linetype_discrete(expression(lambda)) +
+  scale_linetype_discrete() +
   scale_color_manual("",values = c("grey","black")) +
   geom_vline(xintercept = 4000 - EeStart, linetype = "dotted", color = "red") +
   theme(panel.grid.major = element_blank(), 
@@ -75,6 +75,27 @@ df <- data.frame(logrichness = c(log10(S1), log10(S2), log10(S3),log10(S4)), tim
         axis.ticks.y.right = element_line(color = "grey")
 ))
 
-fig_dir <- paste(figure_dir, "ExtinctionEvents_lambdalineplots.png", sep = "")
-ggsave(plot = p1, filename = fig_dir, width = 7, height = 5)
-                                                                                             
+fig_dir1 <- paste(figure_dir, "ExtinctionEvents_lambdalineplots.png", sep = "")
+ggsave(plot = p1, filename = fig_dir1, width = 7, height = 5)
+
+(p2 <- ggplot(data = df, aes(y = logrichness, x = time, group = as.character(relative))) + 
+    geom_line(aes(linetype = as.character(relative),color = "Richness")) +
+    geom_line(aes(y=extinction*30,color = "Extinction")) +
+    scale_x_reverse("Time (Mya)",limits = c(800,0)) +
+    scale_y_continuous("Log(Richness)", breaks = seq(0,32,4), expand = c(0,0),
+                       sec.axis = sec_axis(~./30, name = "Extinction Event Intensity (%)") ) +
+    scale_linetype_discrete(expression(lambda)) +
+    scale_color_manual("",values = c("dodgerblue4","black")) +
+    # geom_vline(xintercept = 4000 - EeStart, linetype = "dotted", color = "red") +
+    theme(panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank(),
+          panel.background = element_blank(),
+          legend.position = "none",
+          axis.text = element_text(size = 11),
+          axis.line = element_line(colour = "black"),
+          axis.ticks = element_line(size = 1),
+          axis.ticks.length = unit(5,"pt")
+    ))
+         
+fig_dir2 <- paste(figure_dir, "Pres_ExtinctionEvents_VariableImpact.png", sep = "")
+ggsave(plot = p2, filename = fig_dir2, width = 7, height = 5)                                                                                    
