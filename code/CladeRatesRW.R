@@ -1,0 +1,157 @@
+## Simulate clade-specific rates by ha
+## Ford Fishman
+
+## SETUP ENVIRONMENT
+rm(list=ls()) # removes all objects in the given environment
+wd <- "~/GitHub/MicroSpeciation"
+data_dir <- paste(wd, "/data/", sep = "")
+figure_dir <- paste(wd, "/figures/", sep = "")
+getwd()
+setwd(wd)
+
+# Load packages
+library("png")
+library("grid")
+library("tidyr")
+library("ggplot2")
+library("viridis")
+
+# Set up parameters
+time <- 4000
+# set up matrix with columns being clade (only 1 to start) and rows representing species over timr
+# species <- matrix(S1 = rep(0,time),nrow = time, ncol = length(epsilon)) 
+
+# starting species has the following relative extinction rate:
+# species[1, "S1"] = 1
+species <- list(c(1))
+S_total <- double(time)
+S_total[1] <- 1.0 # only 1 starting species
+lambda <- c(0.015) # speciation/my, initial value for S1
+lams <- list(c(0.015))
+mu <- c(0.007)
+mus<- list(c(0.007))
+pInit <- 0.001 # per clade probability of a clade creating another clade
+walk <- 0.0001
+# function similating diversification process
+
+  ## Arguments:
+  # lambda - vector of speciation rates for all clades for the previous timestep
+  # mu - vector of extinction rates for all clades for the previous timestep
+  # clades - the richness levels of all clades organized by time and clade
+  # ind - the current time
+
+timestep <- function(lambda, mu, species){
+  
+  St_1 <- species # diversity of clades at previous timestep
+  numClades0 <- length(St_1[St_1>0]) # number of clades before new clade without dead clades
+  numClades_1 <- length(St_1)
+  p <- pInit * numClades0
+    
+  if (runif(n=1)<=p){ # clade has new rate
+    
+    cladeIsDead <- TRUE
+    
+    while(cladeIsDead){ # is the selected clade extinct
+      i <- sample(x = 1:numClades0, size=1)
+      cladeIsDead <- St_1[i] < 0
+    }
+    
+    lambda[numClades_1+1] <- lambda[i]
+    mu[numClades_1+1] <- mu[i]
+    St_1[numClades_1+1] <- 1
+    
+  }
+  
+  numClades1 <- length(lambda) # number of clades
+  testLambda <- runif(numClades1) 
+  testMu <- runif(numClades1) 
+  
+  lambda <- ifelse(testLambda < 0.33, lambda + walk, 
+                   ifelse(testLambda < 0.66, lambda, lambda - walk))
+  mu <- ifelse(testMu < 0.33, mu + walk, 
+                   ifelse(testMu < 0.66, mu, mu - walk))
+  lambda <- ifelse(lambda<0,0,lambda)
+  lambda <- ifelse(lambda>0.031,0.031,lambda)
+  mu <- ifelse(mu<0,0,mu)
+  
+  r <- lambda - mu # diversification/my
+
+  St <- St_1*r + St_1 # diversity of clades after this timestep
+  St <- ifelse(St<1,0,St) # if clade richness is below 1, clade is extinct
+   
+  
+  return(
+    list(
+      lambda=lambda,
+      mu=mu,
+      St=St,
+      r=r
+    )
+  )
+  
+}
+
+
+
+# run the function 
+for (ind in 2:time){
+  
+  simList <- timestep(lambda=lambda, mu=mu, species=species[[ind-1]])
+  # update parameters and diversity counts
+  lambda <- simList$lambda
+  mu <- simList$mu
+  species[[ind]] <- simList$St
+  lams[[ind]] <- lambda
+  mus[[ind]] <- mu
+  S_total[ind] <- sum(species[[ind]])
+}
+summary(S_total)
+
+(totalClades <- max(lengths(species)) )# number of clades with independent rates
+
+
+
+start <- Sys.time()
+l1 <- lapply(species, 'length<-', max(lengths(species)))
+m1 <- matrix(unlist(l1), ncol = totalClades, nrow = time, byrow = TRUE)
+end <- Sys.time()
+end-start
+# start <- Sys.time()
+# m <- matrix( # pre-make matrix with 0's
+#   data = rep.int(0, time * totalClades),
+#   nrow = time,
+#   ncol = totalClades
+# )
+# for (i in 1:time){
+#   row <- c(species[[i]], rep.int(0,totalClades-length(species[[i]])))
+#   m[i,] <- row
+# }
+# 
+# end <- Sys.time()
+# end - start
+
+# total S over time
+ggplot(NULL, aes(x=time:1, y=S_total)) +
+  geom_line() +
+  scale_x_reverse() +
+  scale_y_log10()
+
+#
+r.S_total <- rev(S_total) # put into mya
+df <- as.data.frame(m1)
+df$time <- time:1
+df1 <- gather(df, key = "clade", value = "richness", -time)
+
+ggplot(df1, aes(x=time, y=richness, group=clade)) +
+  geom_line(size = 0.1) +
+  scale_x_reverse("Time (Mya)") +
+  scale_y_log10("Taxon Diversity") +
+  stat_function(fun = function(time) log10(r.S_total[time]), size = 0.8, linetype = "dotted") +
+  stat_function(fun=function(time) log10(exp((lams[[1]][1]-mus[[1]][1])*(4000-time))), color = "blue") +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        axis.text = element_text(size = 11),
+        axis.ticks = element_line(size = 1),
+        axis.ticks.length = unit(5,"pt"),) 

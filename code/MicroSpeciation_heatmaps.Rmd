@@ -19,8 +19,8 @@ getwd()
 setwd(wd)
 source("code/functions.R")
 # Load packages
-require("png")
-require("grid")
+suppressPackageStartupMessages(library("png"))
+suppressPackageStartupMessages(library("grid"))
 suppressPackageStartupMessages(library(kableExtra))
 suppressPackageStartupMessages(library(tidyr))
 suppressPackageStartupMessages(library(ggplot2))
@@ -84,7 +84,7 @@ df_6 <- subset(df1, roundS == 6)
                      breaks = c(0.1, 0.3, 0.5, 0.7, 0.9), 
                      expand = c(0,0)) +
   scale_color_viridis("Log(Richness)") +
-  geom_point(data = df_12, aes(x = lambda, y = epsilon), size = 1.8, color = "grey") +
+  geom_point(data = df_12, aes(x = lambda, y = epsilon), size = 1.8, color = "azure") +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.background = element_blank(),
@@ -118,7 +118,11 @@ df_6 <- subset(df1, roundS == 6)
 )
 # Save figure
 fig1_dir <- paste(figure_dir, "LambdaVSEpsilon_ConstantRatesHeatmap.png", sep = "")
+fig2_dir <- paste(figure_dir, "Pres12_LambdaVSEpsilon_ConstantRatesHeatmap.png", sep = "")
+fig3_dir <- paste(figure_dir, "Pres12_6_LambdaVSEpsilon_ConstantRatesHeatmap.png", sep = "")
 ggsave(plot = p1, filename = fig1_dir, width = 7, height = 5)
+ggsave(plot = pPres1, filename = fig2_dir, width = 7, height = 5)
+ggsave(plot = pPres2, filename = fig3_dir, width = 7, height = 5)
 ```
 
 ```{r}

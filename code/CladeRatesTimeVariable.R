@@ -10,11 +10,11 @@ getwd()
 setwd(wd)
 
 # Load packages
-require("png")
-require("grid")
-require("tidyr")
-require("ggplot2")
-require("viridis")
+library("png")
+library("grid")
+library("tidyr")
+library("ggplot2")
+library("viridis")
 
 # Set up parameters
 time <- 4000
