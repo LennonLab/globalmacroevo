@@ -14,14 +14,19 @@
 ## to summation. 
 
 ## SETUP ENVIRONMENT
-rm(list=ls()) # removes all objects in the given environment
-wd <- "~/GitHub/MicroSpeciation"
-data_dir <- paste(wd, "/data/", sep = "")
-figure_dir <- paste(wd, "/figures/", sep = "")
-getwd()
-setwd(wd)
+
 require(ggplot2, quietly = T)
 require(viridis, quietly = T)
+library("here")
+
+# wd <- "~/GitHub/MicroSpeciation"
+data_dir <- here("data")
+figure_dir <- here("figures")
+# data_dir <- paste(wd, "/data/", sep = "")
+# figure_dir <- paste(wd, "/figures/", sep = "")
+# getwd()
+# setwd(wd)
+
 
 ## define parameters alpha and beta
 sims = 400000 # number of simulations
@@ -54,14 +59,17 @@ pmf_integration <- function(Smin, Smax){
 probPlot <- function(df){
   return(ggplot(data = df, aes(x = lambda, y = epsilon, color = prob)) + 
     geom_point(size = 0.4) +
-    xlab(expression(lambda*" (Species/Myr)")) +
-    scale_y_continuous(expression(epsilon), breaks = c(0.1, 0.3, 0.5, 0.7, 0.9)) +
+    scale_x_continuous(expression(lambda*" (Species/Myr)"), expand=c(0,0)) +
+    scale_y_continuous(expression(epsilon), breaks = c(0.1, 0.3, 0.5, 0.7, 0.9), expand=c(0,0)) +
     scale_color_viridis("Probability") +
     theme(panel.grid.major = element_blank(), 
           panel.grid.minor = element_blank(),
           panel.background = element_blank(),
           legend.position = "right",
-          axis.line = element_blank()))
+          axis.line = element_blank(),
+          axis.text = element_text(size = 11),
+          axis.ticks = element_line(size = 1),
+          axis.ticks.length = unit(5,"pt")))
 }
 # Probability of having exactly 10^12 species
 dfS12 <- data.frame(lambda, epsilon, prob = pmf_integration(0.385*10^12, 3.43*10^12))

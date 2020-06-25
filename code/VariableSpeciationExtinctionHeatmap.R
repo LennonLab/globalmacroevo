@@ -1,13 +1,17 @@
 ## SETUP ENVIRONMENT
-rm(list=ls()) # removes all objects in the given environment
-wd <- "~/GitHub/MicroSpeciation"
-data_dir <- paste(wd, "/data/", sep = "")
-figure_dir <- paste(wd, "/figures/", sep = "")
-getwd()
-setwd(wd)
 require(ggplot2, quietly = T)
 require(viridis, quietly = T)
-source("code/functions.R")
+library("here")
+# rm(list=ls()) # removes all objects in the given environment
+# wd <- "~/GitHub/MicroSpeciation"
+data_dir <- here("data")
+figure_dir <- here("figures")
+# data_dir <- paste(wd, "/data/", sep = "")
+# figure_dir <- paste(wd, "/figures/", sep = "")
+# getwd()
+# setwd(wd)
+
+source(here("code","functions.R"))
 
 ### VARIABLE SPECIATION AND EXTINCTION 
 # Note: reduce number of simulations to reduce run time

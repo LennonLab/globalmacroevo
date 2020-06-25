@@ -11,14 +11,6 @@ geometry: margin=2.54cm
 # Setup Work Environment
 
 ```{r}
-rm(list=ls()) # removes all objects in the given environment
-wd <- "~/GitHub/MicroSpeciation"
-data_dir <- paste(wd, "/data/", sep = "")
-figure_dir <- paste(wd, "/figures/", sep = "")
-getwd()
-setwd(wd)
-source("code/functions.R")
-# Load packages
 suppressPackageStartupMessages(library("png"))
 suppressPackageStartupMessages(library("grid"))
 suppressPackageStartupMessages(library(kableExtra))
@@ -26,6 +18,15 @@ suppressPackageStartupMessages(library(tidyr))
 suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(scales))
 suppressPackageStartupMessages(library(viridis))
+suppressPackageStartupMessages(library(here))
+# rm(list=ls()) # removes all objects in the given environment
+wd <- here()
+data_dir <- paste(wd, "/data/", sep = "")
+figure_dir <- paste(wd, "/figures/", sep = "")
+
+source(here("code", "functions.R"))
+# Load packages
+
 
 ```
 
@@ -78,48 +79,75 @@ df_12 <- subset(df1, roundS == 12)
 df_6 <- subset(df1, roundS == 6)
 (pPres1 <- ggplot(data = df1, aes(x = lambda, y = epsilon, color = roundS)) + 
   geom_point(size = 1.8) +
-  scale_x_continuous(expression(lambda*" (Species/Myr)"),expand = c(0,0)) +
-  scale_y_continuous(expression(epsilon), 
+  scale_x_continuous(expression("Speciation Rate, "*lambda*" (Species/Myr)"),expand = c(0,0)) +
+  scale_y_continuous(expression("Relative Extinction Rate, "*epsilon), 
                      limits = c(0.1, 0.9),
                      breaks = c(0.1, 0.3, 0.5, 0.7, 0.9), 
                      expand = c(0,0)) +
   scale_color_viridis("Log(Richness)") +
+  # stat_function(fun = function(lam) 1 - (log(10^12))/(4000*lam), color = "white", linetype = "dashed")+
+  # stat_function(fun = function(lam) 1 - (log(10^9))/(4000*lam), color = "white", linetype = "dashed")+
+  # stat_function(fun = function(lam) 1 - (log(10^6))/(4000*lam), color = "white", linetype = "dashed")+
+  # stat_function(fun = function(lam) 1 - (log(10^15))/(4000*lam), color = "white", linetype = "dashed")+
+  # stat_function(fun = function(lam) 1 - (log(10^18))/(4000*lam), color = "white", linetype = "dashed")+
   geom_point(data = df_12, aes(x = lambda, y = epsilon), size = 1.8, color = "azure") +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.background = element_blank(),
-        axis.text = element_text(size = 11),
+        axis.text = element_text(size = 12),
         axis.ticks = element_line(size = 1),
         axis.ticks.length = unit(5,"pt"),
         legend.position = "right",
+        legend.text = element_text(size = 12),
+        axis.title = element_text(size = 13),
         axis.line = element_blank(),
         )
 )
 
-(pPres2 <- ggplot(data = df1, aes(x = lambda, y = epsilon, color = roundS)) + 
-  geom_point(size = 1.8) +
-  scale_x_continuous(expression(lambda*" (Species/Myr)"),expand = c(0,0)) +
-  scale_y_continuous(expression(epsilon), 
-                     limits = c(0.1, 0.9),
-                     breaks = c(0.1, 0.3, 0.5, 0.7, 0.9), 
-                     expand = c(0,0)) +
-  scale_color_viridis("Log(Richness)") +
-  geom_point(data = df_12, aes(x = lambda, y = epsilon), size = 1.8, color = "azure") +
-  geom_point(data = df_6, aes(x = lambda, y = epsilon), size = 1.8, color = "azure") +
-  theme(panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.background = element_blank(),
-        axis.text = element_text(size = 11),
-        axis.ticks = element_line(size = 1),
-        axis.ticks.length = unit(5,"pt"),
-        legend.position = "right",
-        axis.line = element_blank(),
-        )
+# (pPres2 <- ggplot(data = df1, aes(x = lambda, y = epsilon, color = roundS)) + 
+#   geom_point(size = 1.8) +
+#   scale_x_continuous(expression(lambda*" (Species/Myr)"),expand = c(0,0)) +
+#   scale_y_continuous(expression(epsilon), 
+#                      limits = c(0.1, 0.9),
+#                      breaks = c(0.1, 0.3, 0.5, 0.7, 0.9), 
+#                      expand = c(0,0)) +
+#   scale_color_viridis("Log(Richness)") +
+#   geom_point(data = df_12, aes(x = lambda, y = epsilon), size = 1.8, color = "azure") +
+#   geom_point(data = df_6, aes(x = lambda, y = epsilon), size = 1.8, color = "azure") +
+#   theme(panel.grid.major = element_blank(),
+#         panel.grid.minor = element_blank(),
+#         panel.background = element_blank(),
+#         axis.text = element_text(size = 11),
+#         axis.ticks = element_line(size = 1),
+#         axis.ticks.length = unit(5,"pt"),
+#         legend.position = "right",
+#         axis.line = element_blank(),
+#         )
 )
-# Save figure
+# p4 <- ggplot(data = df1, aes(x = lambda, y = epsilon, color = roundS)) + 
+#   geom_point(size = 1.8) +
+#   scale_x_continuous(expression(lambda*" (Species/Myr)"),expand = c(0,0)) +
+#   scale_y_continuous(expression(epsilon), 
+#                      limits = c(0.1, 0.9),
+#                      breaks = c(0.1, 0.3, 0.5, 0.7, 0.9), 
+#                      expand = c(0,0)) +
+#   scale_color_viridis("Log(Richness)") +
+#   geom_blank() +
+#   theme(panel.grid.major = element_blank(),
+#         panel.grid.minor = element_blank(),
+#         panel.background = element_blank(),
+#         axis.text = element_text(size = 11),
+#         axis.ticks = element_line(size = 1),
+#         axis.ticks.length = unit(5,"pt"),
+#         legend.position = "right",
+#         axis.line = element_blank(),
+#         )
+
+# Save figures
 fig1_dir <- paste(figure_dir, "LambdaVSEpsilon_ConstantRatesHeatmap.png", sep = "")
 fig2_dir <- paste(figure_dir, "Pres12_LambdaVSEpsilon_ConstantRatesHeatmap.png", sep = "")
 fig3_dir <- paste(figure_dir, "Pres12_6_LambdaVSEpsilon_ConstantRatesHeatmap.png", sep = "")
+# fig4_dir <- paste(figure_dir, "MicroSpeciation_heatmaps_blank.png", sep = "/")
 ggsave(plot = p1, filename = fig1_dir, width = 7, height = 5)
 ggsave(plot = pPres1, filename = fig2_dir, width = 7, height = 5)
 ggsave(plot = pPres2, filename = fig3_dir, width = 7, height = 5)
