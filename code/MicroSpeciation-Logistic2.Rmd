@@ -18,7 +18,7 @@ setwd("~/GitHub/MicroSpeciation/")
 # Load packages
 require("png")
 require("grid")
-````
+```
 
 # Load data
 ```{r}
@@ -113,7 +113,7 @@ axis(side = 2, lwd.ticks = 2, las = 1, cex.axis = 1.25,
    at = c(10^0, 10^4, 10^8, 10^12))
 
 axis(side = 4, lwd.ticks = 2, cex.axis = 1.25, las = 1,
-   labels = F, at = c((10^0, 10^4, 10^8, 10^12))
+   labels = F, at = c(10^0, 10^4, 10^8, 10^12))
 
 axis(side = 1, lwd.ticks = 2, cex.axis = 1.25 , las = 1,
     labels = T, at = c(4000, 400, 40, 1))
@@ -135,7 +135,7 @@ graphics.off()
 # Show Plot
 img <- readPNG("~/GitHub/MicroSpeciation/figures/logistic.richness.png")
 grid.raster(img)
-````
+```
 
 
 # Mass extinction

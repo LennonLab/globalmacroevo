@@ -1,11 +1,21 @@
 ## Simulating Extinction Events Based on Data 
 ## Ford Fishman
 
-# Load packages and functions, setup environment
-source("~/GitHub/MicroSpeciation/code/functions.R")
-require(fitdistrplus)
-require(goft)
-require(actuar)
+## SETUP ENVIRONMENT
+rm(list=ls()) # removes all objects in the given environment
+wd <- "~/GitHub/MicroSpeciation"
+data_dir <- paste(wd, "/data/", sep = "")
+figure_dir <- paste(wd, "/figures/", sep = "")
+getwd()
+setwd(wd)
+require(ggplot2, quietly = T)
+require(viridis, quietly = T)
+require(fitdistrplus, quietly = T)
+require(goft, quietly = T)
+require(actuar, quietly = T)
+source("code/functions.R")
+
+
 ## simulations
 # extract information about intensitera_lengths and era length from the extinction data
 ext_list <- importRohdeMuller()
@@ -93,10 +103,10 @@ for(i in 1:a){
 }
 
 # plot the simulated extinction levels with the actual extinction data
-ggplot(NULL, aes(x=1:4000,y=c(extinction_max, original*100))) + 
+ggplot(NULL, aes(x=4000:1,y=c(extinction_max, original*100))) + 
   geom_line()+
-  geom_vline(xintercept = EeStart, linetype = "dashed", color = "red") +
-  xlab("Time (My)") +
+  geom_vline(xintercept = 4000 - EeStart, linetype = "dashed", color = "red") +
+  scale_x_reverse("Time (Mya)") +
   ylab("Extinction Intensity (%)") +
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
@@ -106,6 +116,53 @@ ggplot(NULL, aes(x=1:4000,y=c(extinction_max, original*100))) +
         axis.line.y.right = element_line(color = "grey"), 
         axis.ticks.y.right = element_line(color = "grey")
   )
+
+data <- c(extinction_max, original*100)
+presFig.d <- rep(0,4000) # pre-vectorize
+
+for (i in 1:length(data)){
+  if (length(data)>(i+20)) {
+    j <- i + 20
+  }else {
+    j <-length(data)
+  }
+  presFig.d[i] <- mean(data[i:j])
+  
+}
+# plot the simulated extinction levels with the actual extinction data
+ggplot(NULL, aes(x=4000:1,y=data)) + 
+  geom_line()+
+  geom_vline(xintercept = 4000 - EeStart, linetype = "dashed", color = "red") +
+  scale_x_reverse("Time (Mya)") +
+  ylab("Extinction Intensity (%)") +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        legend.position = "bottom",
+        axis.line = element_line(colour = "black"),
+        axis.line.y.right = element_line(color = "grey"), 
+        axis.ticks.y.right = element_line(color = "grey")
+  )
+
+# plot for presentation
+presPlot <- ggplot(NULL, aes(x=4000:1,y=presFig.d)) + 
+  geom_line()+
+  # geom_vline(xintercept = 4000 - EeStart, linetype = "dashed", color = "red") +
+  scale_x_reverse("Time (Mya)") +
+  ylab("Extinction Intensity (%)") +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        legend.position = "none",
+        axis.text = element_text(size = 11),
+        axis.title=element_text(size=14,face="bold"),
+        axis.line = element_line(colour = "black"),
+        axis.ticks = element_line(size = 1),
+        axis.ticks.length = unit(5,"pt")
+  )
+
+fig_dir1 <- paste(figure_dir, "ExtinctionEventSimPresentation.png", sep = "")
+ggsave(plot = presPlot, filename = fig_dir1, width = 7, height = 5)
 
 # test of time correlation of extinction data
 summary(extinction_max)

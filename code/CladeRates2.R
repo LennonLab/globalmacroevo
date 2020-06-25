@@ -12,11 +12,11 @@ getwd()
 setwd(wd)
 
 # Load packages
-require("png")
-require("grid")
-require("tidyr")
-require("ggplot2")
-require("viridis")
+library("png")
+library("grid")
+library("tidyr")
+library("ggplot2")
+library("viridis")
 
 species <- list("0.0" = double(4000), "0.5" = double(4000), "0.9" = double(4000))
 species$`0.0`[1] = 1.0
