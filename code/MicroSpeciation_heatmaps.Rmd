@@ -44,9 +44,9 @@ rounding_scheme <- function(S){
 
 
 ```{r}
-lambda <- runif(n = 400000, min = 0.008, max = 0.031) # speciation rates
+lambda <- runif(n = 400000, min = 0.004, max = 0.031) # speciation rates
 # epsilon <- 10^runif(n = 40000, min = -1, max = -0.05) # mu/lambda
-epsilon <- runif(n = 400000, min = 0.1, max = 0.9) # mu/lambda
+epsilon <- runif(n = 400000, min = 0.0, max = 0.9) # mu/lambda
 mu <- lambda * epsilon # extinction rates
 r <- lambda - mu # diversification rate
 S0 <- 1
@@ -56,7 +56,6 @@ df1 <- cbind(df1, rounding_scheme(S))
 ```
 
 ```{r}
-# heatmap made from scatter plot
 (p1 <- ggplot(data = df1, aes(x = lambda, y = epsilon, color = roundS)) + 
   geom_point(size = 1.8) +
   scale_x_continuous(expression(lambda*" (Species/Myr)"),expand = c(0,0)) +
@@ -75,13 +74,18 @@ df1 <- cbind(df1, rounding_scheme(S))
         axis.line = element_blank(),
         )
 )
+```
+
+
+```{r}
+# heatmap made from scatter plot
 df_12 <- subset(df1, roundS == 12)
 df_6 <- subset(df1, roundS == 6)
 (pPres1 <- ggplot(data = df1, aes(x = lambda, y = epsilon, color = roundS)) + 
   geom_point(size = 1.8) +
   scale_x_continuous(expression("Speciation Rate, "*lambda*" (Species/Myr)"),expand = c(0,0)) +
   scale_y_continuous(expression("Relative Extinction Rate, "*epsilon), 
-                     limits = c(0.1, 0.9),
+                     limits = c(0.0, 0.9),
                      breaks = c(0.1, 0.3, 0.5, 0.7, 0.9), 
                      expand = c(0,0)) +
   scale_color_viridis("Log(Richness)") +
@@ -123,7 +127,7 @@ df_6 <- subset(df1, roundS == 6)
 #         legend.position = "right",
 #         axis.line = element_blank(),
 #         )
-)
+# )
 # p4 <- ggplot(data = df1, aes(x = lambda, y = epsilon, color = roundS)) + 
 #   geom_point(size = 1.8) +
 #   scale_x_continuous(expression(lambda*" (Species/Myr)"),expand = c(0,0)) +

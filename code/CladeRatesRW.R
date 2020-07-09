@@ -46,9 +46,8 @@ walk <- 0.0001
 timestep <- function(lambda, mu, species){
   
   St_1 <- species # diversity of clades at previous timestep
-  numClades0 <- length(St_1[St_1>0]) # number of clades before new clade without dead clades
-  numClades_1 <- length(St_1)
-  p <- pInit * numClades0
+  numClades0 <- length(St_1) # number of clades before new clade 
+  p <- pInit * numClades0 # probability of forming a new clade
     
   if (runif(n=1)<=p){ # clade has new rate
     
@@ -59,9 +58,9 @@ timestep <- function(lambda, mu, species){
       cladeIsDead <- St_1[i] < 0
     }
     
-    lambda[numClades_1+1] <- lambda[i]
-    mu[numClades_1+1] <- mu[i]
-    St_1[numClades_1+1] <- 1
+    lambda[numClades0+1] <- lambda[i]
+    mu[numClades0+1] <- mu[i]
+    St_1[numClades0+1] <- c(1.0) # new clade forms
     
   }
   

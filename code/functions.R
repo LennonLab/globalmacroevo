@@ -7,10 +7,11 @@ require("tidyr")
 require("ggplot2")
 require("viridis")
 require("scales")
+require("here")
 
 ## Setup environment
-rm(list=ls()) # removes all objects in the given environment
-wd <- "~/GitHub/MicroSpeciation"
+# rm(list=ls()) # removes all objects in the given environment
+wd <- here()
 data_dir <- paste(wd, "/data/", sep = "")
 figure_dir <- paste(wd, "/figures/", sep = "")
 getwd()
@@ -42,12 +43,13 @@ setwd(wd)
 # t+2   y
 importRohdeMuller <- function(path = paste(data_dir, "Extinction_Rohde_Muller_raw.csv", sep = "")){
   ext <- read.csv(path)
+  ext$RelativeExtinction <- ext$ExtinctionIntensity/ext$OriginationIntensity
   original <- ext$ExtinctionIntensity # Untouched extinction values, for the purposes of making graphs
   peak_ext <- c() # Only consider extinction events at end of era
   avg_ext <- c()  # Average out exitinction percentage over entire time period
   era_lengths <- c() # vector of era lengths
   era_means <- c() #vector of mean era extinction intensities
-  
+ 
   for (i in 1:nrow(ext)){
     
     if (i == 1){
@@ -100,7 +102,10 @@ importRohdeMuller <- function(path = paste(data_dir, "Extinction_Rohde_Muller_ra
   avg_ext <- avg_ext[order(names(avg_ext))]/100
   names(original) <- ext$time
   original <- original[order(names(original))]/100
-  return(list(original=original,peak_ext=peak_ext,avg_ext=avg_ext,era_lengths=era_lengths,era_means=era_means))
+  
+  rel_ext <- ext$RelativeExtinction[order(names(original))]
+  
+  return(list(original=original,peak_ext=peak_ext,avg_ext=avg_ext, rel_ext = rel_ext, era_lengths=era_lengths,era_means=era_means))
 }
 
 ## Used for binning into colors for heatmap
@@ -138,4 +143,12 @@ magnify_trans <- function(intercept, reducer) {
   )
 }
 
+# reverse log axis tranformation
+reverselog_trans <- function(base = exp(1)) {
+  trans <- function(x) -log(x, base)
+  inv <- function(x) base^(-x)
+  trans_new(paste0("reverselog-", format(base)), trans, inv, 
+            log_breaks(base = base), 
+            domain = c(1e-100, Inf))
+}
 
