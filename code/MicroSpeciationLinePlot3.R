@@ -1,15 +1,19 @@
 ## Modeling impacts of mass extiction on microbial diversity
 ## Does not use Sepkoski intensities
 ## Ford Fishman
-library(scales)
-library(MASS)
-library(grid)
+
 library(ggplot2)
 library(tidyr)
-library(png)
+library(here)
+library(stringr)
+library(ggrepel)
 
 # Load packages and functions, set environment
-source("~/GitHub/MicroSpeciation/code/functions.R")
+
+setwd(here())
+source("code/functions.R")
+figure_dir <- "figures/"
+
 
 # Mass extinction events
 GOE <- 2450
@@ -25,6 +29,8 @@ timestep <- function(S, r){
 }
 
 EE <- c(GOE, OrdovicianSilurian, LateDevonian, PermianTriassic,TriassicJurassic, CretaceousPaleogene)
+EE_labels <- c('GOE', 'O-S', 'D', 'P-Tr','Tr-J', 'C-P')
+df_EE <- data.frame(year=EE, event=EE_labels)
 
 lambda <- 0.015
 epsilon <- rep(0.5,4)
@@ -38,14 +44,10 @@ for(t in 2:4000) {
   
   ep <- rnorm(n = length(epsilon), mean = epsilon, sd = 0.3) # give an epsilon near the actual epsilon for all simulations per time step
   ep <- ifelse(ep<0,0,ep) # if epsilon is ever less than 0, make it 0
-  # ep <- ifelse(ep>1,0.9,ep) # don't want epsilon above 0.
-  
+
   if (mya %in% EE) {
     
-    
-    
     p <- c(0, 0.1, 0.5, 0.9) # proportion of taxa that go extinct
-    # ep <- 0 # turn off background extinction
     
   } else {
 
@@ -64,25 +66,35 @@ df1 <- data.frame(zero = S1, ten = S2, fifty = S3, ninety = S4, mya=4000:1)
 
 df2 <- gather(df1, key = "intensity", value = "richness",-mya)
 
-# library("scales")
+df2$intensity <- str_replace(df2$intensity, 'zero', '0%')
+df2$intensity <- str_replace(df2$intensity, 'ten', '10%')
+df2$intensity <- str_replace(df2$intensity, 'fifty', '50%')
+df2$intensity <- str_replace(df2$intensity, 'ninety', '90%')
 
-ggplot(df2, aes(x = mya, y = richness, group = intensity)) +  
-  geom_line(aes(linetype = intensity)) +
-  scale_y_log10("Taxon Diversity", expand = c(0,0)) +
-  scale_x_continuous("Millions of Years Ago", trans = reverselog_trans(10), breaks = c(4000, 1000, 100, 10), limits=c(4000, 10)) +
-  geom_vline(xintercept = EE, size = 4, alpha = 0.4) +
-  scale_linetype_manual("Taxa removed by each event", 
+df3 <- subset(df2, mya>=10)
+
+p1 <- ggplot(df3, aes(x = mya, y = log10(richness), group = intensity)) +  
+    geom_line(aes(linetype = intensity)) +
+    scale_x_continuous("Millions of Years Ago", trans = reverselog_trans(10), breaks = c(4000, 1000, 100, 10), limits=c(4000, 8)) +
+    scale_y_continuous("Taxon Diversity", breaks = c(3, 6, 9, 12), expand = c(0,0),labels =  math_format(10^.x), limits = c(0,15)) +
+    
+    scale_linetype_manual("Taxa removed by each event", 
                         values = c("solid", "dotted", "dashed","dotdash"),
-                        limits = c("zero", "ten", "fifty","ninety"), 
                         labels = c("0%", "10%","50%", "90%")) +
-  annotation_logticks(sides = "lb") +
-  theme(panel.grid.major = element_blank(), 
+    annotation_logticks(sides = "b") +
+    geom_text(data = subset(df3, mya==10),aes(label = intensity), x = Inf, hjust = 1)+
+    geom_text(data=df_EE, aes(x=year,y = 14.5,label = event),size=2, inherit.aes = F)+
+    geom_segment(data=df_EE,aes(x = year, xend = year, y = 0, yend=14),size = 4, alpha = 0.4, inherit.aes = F) +
+    theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
         panel.background = element_blank(),
-        legend.position = "bottom",
+        legend.position = "none",
         axis.text = element_text(size = 12),
         axis.title = element_text(size = 14, face = "bold"),
         axis.line = element_line(colour = "black"),
-        # axis.ticks = element_line(size = 1),
-        axis.ticks.length = unit(5,"pt")
+        axis.ticks.length = unit(5,"pt"),
+        plot.margin = unit(c(1,3,1,1), "lines")
   )
+
+fig1_dir <- paste0(figure_dir, "ExtinctionLinePlot.png")
+ggsave(plot = p1, filename = fig1_dir, width = 7, height = 5)
