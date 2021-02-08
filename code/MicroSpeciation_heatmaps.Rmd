@@ -21,8 +21,8 @@ suppressPackageStartupMessages(library(viridis))
 suppressPackageStartupMessages(library(here))
 # rm(list=ls()) # removes all objects in the given environment
 wd <- here()
-data_dir <- paste(wd, "/data/", sep = "")
-figure_dir <- paste(wd, "/figures/", sep = "")
+data_dir <- paste0(wd, "/data/")
+figure_dir <- paste0(wd, "/figures/")
 
 source(here("code", "functions.R"))
 # Load packages
@@ -55,6 +55,7 @@ df1 <- data.frame(lambda, epsilon, mu, r, S)
 df1 <- cbind(df1, rounding_scheme(S))
 ```
 
+
 ```{r}
 (p1 <- ggplot(data = df1, aes(x = lambda, y = epsilon, color = roundS)) + 
   geom_point(size = 1.8) +
@@ -79,9 +80,9 @@ df1 <- cbind(df1, rounding_scheme(S))
 
 ```{r}
 # heatmap made from scatter plot
-df_12 <- subset(df1, roundS == 12)
-df_6 <- subset(df1, roundS == 6)
-(pPres1 <- ggplot(data = df1, aes(x = lambda, y = epsilon, color = roundS)) + 
+# df_12 <- subset(df1, roundS == 12)
+# df_6 <- subset(df1, roundS == 6)
+(p1 <- ggplot(data = df1, aes(x = lambda, y = epsilon, color = roundS)) + 
   geom_point(size = 1.8) +
   scale_x_continuous(expression("Speciation Rate, "*lambda*" (Species/Myr)"),expand = c(0,0)) +
   scale_y_continuous(expression("Relative Extinction Rate, "*epsilon), 
@@ -89,12 +90,12 @@ df_6 <- subset(df1, roundS == 6)
                      breaks = c(0.1, 0.3, 0.5, 0.7, 0.9), 
                      expand = c(0,0)) +
   scale_color_viridis("Log(Richness)") +
-  # stat_function(fun = function(lam) 1 - (log(10^12))/(4000*lam), color = "white", linetype = "dashed")+
-  # stat_function(fun = function(lam) 1 - (log(10^9))/(4000*lam), color = "white", linetype = "dashed")+
-  # stat_function(fun = function(lam) 1 - (log(10^6))/(4000*lam), color = "white", linetype = "dashed")+
-  # stat_function(fun = function(lam) 1 - (log(10^15))/(4000*lam), color = "white", linetype = "dashed")+
-  # stat_function(fun = function(lam) 1 - (log(10^18))/(4000*lam), color = "white", linetype = "dashed")+
-  geom_point(data = df_12, aes(x = lambda, y = epsilon), size = 1.8, color = "azure") +
+  stat_function(fun = function(lam) 1 - (log(10^12))/(4000*lam), color = "white", linetype = "dashed")+
+  stat_function(fun = function(lam) 1 - (log(10^9))/(4000*lam), color = "white", linetype = "dashed")+
+  stat_function(fun = function(lam) 1 - (log(10^6))/(4000*lam), color = "white", linetype = "dashed")+
+  stat_function(fun = function(lam) 1 - (log(10^15))/(4000*lam), color = "white", linetype = "dashed")+
+  stat_function(fun = function(lam) 1 - (log(10^18))/(4000*lam), color = "white", linetype = "dashed")+
+  # geom_point(data = df_12, aes(x = lambda, y = epsilon), size = 1.8, color = "azure") +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.background = element_blank(),
@@ -103,6 +104,7 @@ df_6 <- subset(df1, roundS == 6)
         axis.ticks.length = unit(5,"pt"),
         legend.position = "right",
         legend.text = element_text(size = 12),
+        legend.text.align = 1,
         axis.title = element_text(size = 13),
         axis.line = element_blank(),
         )
@@ -148,13 +150,13 @@ df_6 <- subset(df1, roundS == 6)
 #         )
 
 # Save figures
-fig1_dir <- paste(figure_dir, "LambdaVSEpsilon_ConstantRatesHeatmap.png", sep = "")
-fig2_dir <- paste(figure_dir, "Pres12_LambdaVSEpsilon_ConstantRatesHeatmap.png", sep = "")
-fig3_dir <- paste(figure_dir, "Pres12_6_LambdaVSEpsilon_ConstantRatesHeatmap.png", sep = "")
+fig1_dir <- paste(figure_dir, "ExpectationBD_Heatmap.png", sep = "")
+# fig2_dir <- paste(figure_dir, "Pres12_LambdaVSEpsilon_ConstantRatesHeatmap.png", sep = "")
+# fig3_dir <- paste(figure_dir, "Pres12_6_LambdaVSEpsilon_ConstantRatesHeatmap.png", sep = "")
 # fig4_dir <- paste(figure_dir, "MicroSpeciation_heatmaps_blank.png", sep = "/")
 ggsave(plot = p1, filename = fig1_dir, width = 7, height = 5)
-ggsave(plot = pPres1, filename = fig2_dir, width = 7, height = 5)
-ggsave(plot = pPres2, filename = fig3_dir, width = 7, height = 5)
+# ggsave(plot = pPres1, filename = fig2_dir, width = 7, height = 5)
+# ggsave(plot = pPres2, filename = fig3_dir, width = 7, height = 5)
 ```
 
 ```{r}
@@ -181,175 +183,6 @@ df2 <- data.frame(lambda, epsilon, mu, r, S)
 df2 <- cbind(df2, rounding_scheme(S))
 ```
 
-```{r}
-# heatmap 2
-(p2 <- ggplot(data = df2, aes(x = lambda, y = epsilon, color = roundS)) + 
-  geom_point(size = 1.8) +
-  xlab(expression(lambda*" (Species/Myr)")) +
-  scale_y_continuous(expression(epsilon), breaks = c(0.1, 0.3, 0.5, 0.7, 0.9)) +
-  scale_color_viridis("Log(Richness)") +
-  theme(panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(),
-        panel.background = element_blank(),
-        legend.position = "right",
-        axis.line = element_blank())
-)
-# Save figure
-fig2_dir <- paste(figure_dir, "LambdaVSEpsilon_VariableRatesHeatmap.png", sep = "")
-ggsave(plot = p2, filename = fig2_dir, width = 7, height = 5)
-```
 
-```{r}
-# Load data for extinction events
-
-# Say x is diversity and y is extinction intensity for an era lasting 3 years
-# Current dataset has data like the following for an era lasting 3 My:
-# Time  Diversity   ExtinctionIntensity
-# t     x           y 
-# t+1   x           y
-# t+2   x           y
-
-# I'm altering it to look like this to spread out extinction over
-# the entire length of the era:
-
-# Time  ExtinctionIntensity
-# t     y/3 
-# t+1   y/3
-# t+1   y/3
-
-ext_file <- paste(data_dir, "Extinction_Rohde_Muller_raw.csv", sep = "")
-ext <- read.csv(ext_file)
-
-avg_ext <- c()
-
-# Average out exitinction percentage over entire time period
-for (i in 1:nrow(ext)){
-  
-  if (i == 1){
-    # First entry in the dataframe starts a paleontologic era
-    era <- c(ext$ExtinctionIntensity[i])
-    
-    # For all entries after the first: 
-  } else {
-    # I assume that when either ExtinctionIntensity or Diversity changes,
-    # then a new era has begun, otherwise, an era continues
-    if (ext$Diversity[i] == ext$Diversity[i-1] & ext$ExtinctionIntensity[i] == ext$ExtinctionIntensity[i-1]) {
-      era <- c(era, ext$ExtinctionIntensity[i])
-      if (i == nrow(ext)) { # if the last entry is its own era
-        
-        # integer(x) makes a vector of zeros of length x
-        # the mean of extinction intensity is evenly distributed over an era's duration
-        # avg_ext <- c(avg_ext, integer(length(era)) + mean(era)/length(era))
-        a <- integer(length(era))
-        a[length(a)] <- mean(era)
-        avg_ext <- c(avg_ext, a)
-      }
-      
-    } else { # if a new era is beginning
-      # Add previous era into vector
-      a <- integer(length(era))
-      a[length(a)] <- mean(era)
-      avg_ext <- c(avg_ext, a)
-      era <- c(ext$ExtinctionIntensity[i]) # begin recording new era
-      
-      if (i == nrow(ext)) { # if the last entry is part of another era
-        a <- integer(length(era))
-        a[length(a)] <- mean(era)
-        avg_ext <- c(avg_ext, a)
-      }
-    }
-  }
-}
-
-# Add back into dataframe
-ext <- cbind(ext, AverageExtinction = avg_ext) 
-ext$time <- as.character(4000 - ext$Mya)
-
-names(avg_ext) <- ext$time
-avg_ext <- avg_ext[order(names(avg_ext))]/100 
-```
-
-```{r}
-### VARIABLE EXTINCTION w/ SOME FIXED EXTINCTION
-
-lambda <- runif(n = 40000, min = 0.008, max = 0.031) # speciation rates
-epsilon <- runif(n = 40000, min = 0.1, max = 0.9) # mu/lambda
-mu <- c() # extinction rates
-r <- c()
-S <- integer(length = 40000) + 1 # keeps track of species for each set of parameters
-EeStart <- as.integer(names(avg_ext[1])) # first year with data
-
-# Simulate, but replace random background extinction levels 
-# with "known" extinction rates for macroorganisms for "recent" years
-for(t in 2:4000) {
-  if (t < EeStart){ # before data, make extinction be random
-    ep <- rnorm(n = epsilon, mean = epsilon, sd = 0.05) # give me an epsilon near the actual epsilon for all simulations per time step
-    ep <- ifelse(ep<0,0.01,ep) # if epsilon is ever less than 0, make it 0.1
-    ep <- ifelse(ep>1,0.9,ep) # don't want epsilon above 0.9
-    mu <- lambda * ep 
-    r <- lambda - mu # diversification rate
-    S <- S * exp(r) # discrete exponential growth, pure birth
-  } else { # when extinction data starts, use it in place of random data
-    ep <- avg_ext[t - EeStart + 1]
-    r <- lambda # diversification rate is just lambda
-    S <- S * exp(r)* (1 - ep) # ep % of population dies
-  }
-  
-}
-
-df3 <- data.frame(lambda, epsilon, mu, r, S)
-df3 <- cbind(df3, rounding_scheme(S))
-
-```
-
-```{r}
-# heatmap 3
-(p3 <- ggplot(data = df3, aes(x = lambda, y = epsilon, color = roundS)) + 
-  geom_point(size = 1.8) +
-  xlab(expression(lambda*" (Species/Myr)")) +
-  scale_y_continuous(expression(epsilon), breaks = c(0.1, 0.3, 0.5, 0.7, 0.9)) +
-  scale_color_viridis("Log(Richness)") +
-  theme(panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(),
-        panel.background = element_blank(),
-        legend.position = "right",
-        axis.line = element_blank())
-)
-fig3_dir <- paste(figure_dir, "LambdaVSEpsilon_EeVariableRatesHeatmap.png", sep = "")
-ggsave(plot = p3, filename = fig3_dir, width = 7, height = 5)
-```
-
-```{r}
-### CONSTANT MEDIAN EXTINCTION EVENT
-
-lambda <- runif(n = 40000, min = 0.008, max = 0.031) # speciation rates
-S <- integer(length = 40000) + 1 # keeps track of species for each set of parameters
-EeStart <- as.integer(names(avg_ext[1])) # first year with data
-
-# Simulate, but replace random background extinction levels 
-# with "known" extinction rates for macroorganisms for "recent" years
-for(t in 2:4000) {
-  ep <- median(avg_ext)
-  r <- lambda # diversification rate is just lambda
-  S <- S * exp(r)* (1 - ep) # ep % of population dies
-}
-
-df4 <- data.frame(lambda, r, S)
-df4 <- cbind(df4, rounding_scheme(S))
-
-```
-
-```{r}
-(p4 <- ggplot(data = subset(df4), aes(y = roundS, x = lambda)) + 
-  geom_point() +
-  xlab(expression(lambda*" (Species/Myr)")) +
-  scale_color_viridis("Log(Richness)") +
-  theme(panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(),
-        panel.background = element_blank(),
-        legend.position = "right",
-        axis.line = element_blank())
-)
-```
 
 

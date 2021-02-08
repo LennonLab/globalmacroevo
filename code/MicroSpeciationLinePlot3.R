@@ -6,7 +6,6 @@ library(ggplot2)
 library(tidyr)
 library(here)
 library(stringr)
-library(ggrepel)
 
 # Load packages and functions, set environment
 
@@ -29,7 +28,7 @@ timestep <- function(S, r){
 }
 
 EE <- c(GOE, OrdovicianSilurian, LateDevonian, PermianTriassic,TriassicJurassic, CretaceousPaleogene)
-EE_labels <- c('GOE', 'O-S', 'D', 'P-Tr','Tr-J', 'C-P')
+EE_labels <- c('GOE', 'O-S', 'D', 'P-Tr','Tr-J', 'K-T')
 df_EE <- data.frame(year=EE, event=EE_labels)
 
 lambda <- 0.015
@@ -95,6 +94,7 @@ p1 <- ggplot(df3, aes(x = mya, y = log10(richness), group = intensity)) +
         axis.ticks.length = unit(5,"pt"),
         plot.margin = unit(c(1,3,1,1), "lines")
   )
+p1
 
 fig1_dir <- paste0(figure_dir, "ExtinctionLinePlot.png")
 ggsave(plot = p1, filename = fig1_dir, width = 7, height = 5)
