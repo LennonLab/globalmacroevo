@@ -1,0 +1,19 @@
+#!/bin/bash
+
+#SBATCH -J emp_ratio
+#SBATCH -p general
+#SBATCH -o emp_ratio_%j.txt
+#SBATCH -e emp_ratio_%j.err
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=ffishman@iu.edu
+#SBATCH --nodes=1
+#SBATCH --mem=100000
+#SBATCH --ntasks-per-node=24
+#SBATCH --time=5:00:00
+
+source activate micro-spec
+
+export sourcepath=$(pwd)
+cd $sourcepath/code/python
+
+python processEMP.py
