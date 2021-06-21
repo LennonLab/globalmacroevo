@@ -2,3 +2,10 @@
 .Rhistory
 .RData
 .Ruserdata
+*.logfile
+emp_ratio_*
+16Sblast_*
+data/16S/rdp*
+*taxdb*
+*rdp_db*
+*.tar
