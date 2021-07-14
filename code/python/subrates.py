@@ -11,7 +11,7 @@ arguments = parser.parse_args()
 wd = arguments.wd
 
 age_file = wd + "accessions_age.csv"
-div_file = wd + "divergence.csv"
+div_file = wd + "divergence_silva.csv"
 output = wd + "subrates.csv"
 
 ages = dict()

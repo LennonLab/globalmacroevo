@@ -17,13 +17,13 @@ with open(filename) as r:
         query = parts[0]
 
 
-        if not query in results:
+        if not query in species:
 
             species[query] = [[parts[6]],[parts[3]]] #[[species],[perc. ident]]
 
         else:
-            results[query][0].append(parts[6]) # species
-            results[query][1].append(parts[3]) # perc. ident
+            species[query][0].append(parts[6]) # species
+            species[query][1].append(parts[3]) # perc. ident
 
 final_genera = dict()
 
@@ -41,7 +41,7 @@ for query, parts in species.items():
             counts[genus] += pident
 
         else:
-            counts[genus] = p_ident
+            counts[genus] = pident
     
     # pick the genus with the highest weighted count
     genus = max(counts, key=counts.get)
