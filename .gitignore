@@ -5,6 +5,9 @@
 *.logfile
 emp_ratio_*
 16Sblast_*
+16S_div_*
+16S_tree_*
+16S_align_*
 data/16S/rdp*
 *taxdb*
 *rdp_db*
