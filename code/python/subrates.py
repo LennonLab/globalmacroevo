@@ -42,7 +42,7 @@ with open(div_file, "r") as r:
     
     with open(output, 'w') as f:
 
-        f.write('%s,%s,%s,%s,%s\n' % ('acc', 'low_sub','high_sub','age_low', 'age_high'))
+        f.write('%s,%s,%s,%s,%s,%s\n' % ('acc', 'low_sub','high_sub','age_low', 'age_high', 'div'))
     
 
         for line in r:
@@ -72,7 +72,7 @@ with open(div_file, "r") as r:
             if (high_sub == 0 and low_sub == 0) or (np.isnan(high_sub) and np.isnan(low_sub)):
                 continue
 
-            f.write('%s,%s,%s,%s,%s\n' % (acc, low_sub, high_sub, age_low, age_high))
+            f.write('%s,%s,%s,%s,%s,%s\n' % (acc, low_sub, high_sub, age_low, age_high, div))
 
 
 
