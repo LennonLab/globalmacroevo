@@ -15,7 +15,7 @@ data_dir <- paste0(wd, "/data/")
 figure_dir <- paste0(wd, "/figures/")
 
 # create a gradent of lambda values
-lam <- seq(0.004, 0.031, 0.00001) # based on Kuo & Ochman (2009), with a slightly smaller lower end
+lam <- seq(0.002, 0.032, 0.00001) # based on Kuo & Ochman (2009), with a slightly smaller lower end
 t <- 4000 # present day diversity, 4000 My of evolution
 df <- data.frame(lam) # initialize dataframe
 
@@ -73,9 +73,12 @@ pal <- viridis_pal()(7)
   annotate(geom="text", label='10^5',x=0.008, y = y1(0.008), color = 'white', size = 6, parse=TRUE) +
   annotate(geom="text", label=labels,x=xs, y = ys, color = 'white', size = 6, parse=TRUE) +
   annotate(geom="text", label='10^23',x=0.023, y = y1(0.023), color = 'black', size = 6, parse=TRUE) +
-  scale_x_continuous(expression("Speciation Rate, "*lambda*" (Species/Myr)"),expand = c(0,0)) +
+  scale_x_continuous(expression("Speciation Rate, "*lambda*" (Species/Myr)"),
+                     limits=c(0.002, 0.032),
+                     breaks=seq(0.005, 0.03, 0.005),
+                     expand = c(0,0)) +
   scale_y_continuous("Relative Extinction Rate, \u03B5", 
-                     limits = c(0.0, 0.9),
+                     limits = c(0.0, 0.92),
                      breaks = c(0.1, 0.3, 0.5, 0.7, 0.9), 
                      expand = c(0,0)) +
   theme(panel.grid.major = element_blank(),
@@ -87,7 +90,25 @@ pal <- viridis_pal()(7)
         legend.position = "right",
         legend.text = element_text(size = 12),
         legend.text.align = 1,
-        axis.title = element_text(size = 13)))
+        axis.title = element_text(size = 14, face = "bold")))
+
 # Save figures
 fig1_dir <- paste(figure_dir, "ExpectationBD_Heatmap.png", sep = "")
 ggsave(plot = p1, filename = fig1_dir, width = 7, height = 5)
+
+
+
+prob_ep <- function(lam){
+  mag <- c(6, 9, 12, 15, 18, 23)
+  x <- 1 - (log(10^mag))/(4000*lam)
+  y <- rep(0, length(x)-1)
+  x <- ifelse(x<=0, 0, x)
+  x <- ifelse(x>=1, 1, x)
+  for (i in 1:length(x)-1){
+    y[i] <- x[i]-x[i+1]
+  }
+  
+  
+  return(y/sum(y)) # relativize
+}
+
