@@ -7,17 +7,18 @@ import numpy as np
 import multiprocessing as mp
 from functools import partial
 
-def map_proc(line, site_labels)->bool:
+def map_proc(line, site_labels)->list:
+    """
+    main function for multiprocessing
+    """
     
     line = line.strip()
     parts = line.split("\t")
     otu = parts[1:-1]
 
-    # vals = np.array([ -1 if env_dict[sample]=="Free-living" else 1 for sample in samples ]) 
-
-    abundance = np.array(otu, dtype='f')
+    abundance = np.array(otu, dtype='f') # convert to np array (float)
     
-    pa = np.heaviside(abundance, 0) # presence absence
+    pa = np.heaviside(abundance, 0) # convert abundance to presence absence
 
     env_type = site_labels * pa # -1 for free-living, 0 for absent, 1 for host-associated
 
@@ -31,7 +32,8 @@ def map_proc(line, site_labels)->bool:
        
     return [ha, majority_ha, obligate_ha, fa, majority_fa, obligate_fa]
 
-emp_path = "/geode2/home/u030/ffishman/Carbonate/GitHub/MicroSpeciation/data/EMP/"
+# file paths
+emp_path = "~/GitHub/MicroSpeciation/data/EMP/"
 sbs_path = emp_path + "emp_sbs.txt"
 meta_path = emp_path + "emp_qiime_mapping_release1_20170912.tsv"
 
@@ -41,41 +43,32 @@ nrows = meta.shape[0]
 
 env_dict = dict()
 
+# read in metadata file
 for i in range(nrows):
 
     sample = meta.SampleID[i]
     env = meta.empo_1[i]
     env_dict[sample] = env
 
-# print(env_dict)
+# read in site by species file
 with open(sbs_path) as r:
-    line1 = r.readline()
-    line2 = r.readline().strip()
-    # line3 = r.readline().strip()
-    otus = r.readlines()
+    line1 = r.readline() # header information
+    line2 = r.readline().strip() # site information
+    otus = r.readlines() # rest of file is OTU abundance
 
-# print(line2.split("\t")[0:20])
 sites = line2.split("\t")[1:-1] # dont include tax information
 
 otu_table = dict()
 
 site_labels = np.array([ -1 if env_dict[site]=="Free-living" else 1 for site in sites ]) # -1 if freeliving, 1 if host associated
 
-# test
-# parts = line3.split("\t")
-# otu = parts[1:-1]
-# otu_v = np.array(otu, dtype = 'f')
-
-# env_type = site_labels * np.array(otu, dtype='f')
-# print((env_type > 0).all())
-
-part_proc = partial(map_proc, site_labels=site_labels)
+part_proc = partial(map_proc, site_labels=site_labels) # partial function, with filled site_labels argument
 
 pool = mp.Pool(mp.cpu_count())
 
 print("%s Processors\n" % mp.cpu_count() )
 
-envs = pool.map(part_proc, otus, chunksize=1)
+envs = pool.map(part_proc, otus, chunksize=1) # run multiprocessing, output a list of lists
 
 pool.close()
 
@@ -89,6 +82,7 @@ fa = np.sum(df.fa)/n
 m_fa = np.sum(df.majority_fa)/n
 o_fa = np.sum(df.obligate_fa)/n
 
+# print results
 print('host-associated:\t%s' % ha)
 print('majority ha:\t%s' % m_ha)
 print('obligate ha:\t%s' % o_ha)
