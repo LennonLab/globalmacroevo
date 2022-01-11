@@ -1,5 +1,9 @@
+## treeseqs.R
+## Ford Fishman
+## removes unwanted samples from metadata and taxonomy, creates one .csv will all used info
+
 metadata <- read.csv("data/16S/taxonomy.csv", header = F, row.names = 1)
-subrates <- read.csv("data/16S/subrates.csv")
+subrates <- read.csv("data/16S/subrates_1My.csv")
 
 phyla <- rep("", nrow(subrates))
 
