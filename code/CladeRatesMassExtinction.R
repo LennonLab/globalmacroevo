@@ -7,7 +7,13 @@ library(grid)
 library(ggplot2)
 library(tidyr)
 library(png)
-source("~/GitHub/MicroSpeciation/code/functions.R")
+library(here)
+# source("~/GitHub/MicroSpeciation/code/functions.R")
+
+wd <- here()
+data_dir <- paste(wd, "/data/", sep = "")
+figure_dir <- paste(wd, "/figures/", sep = "")
+
 
 # Mass extinction events
 GOE <- 2450
@@ -28,6 +34,40 @@ S_total <- rep(0, time)
 S_total[1] <- 1.0 
 pInit <- 0.001 # per clade probability of a clade creating another clade
 q <- c(1.0) # susceptibility to mass extinction
+
+## Transformation for plot
+magnify_trans <- function(intercept, reducer) {
+  
+  trans <- function(x, i = intercept, r = reducer) {
+    sapply(x, function(x) {
+      if (x < i) x
+      else x / r + i
+    })
+  }
+  
+  inv <- function(x, i = intercept, r = reducer) {
+    sapply(x, function(x) {
+      if(!is.na(x)) {
+        if (x < i) x
+        else (x - i) * r
+      }
+    })
+  }
+  
+  trans_new(name = 'custom',
+            transform = trans,
+            inverse = inv
+  )
+}
+
+# reverse log axis tranformation
+reverselog_trans <- function(base = exp(1)) {
+  trans <- function(x) -log(x, base)
+  inv <- function(x) base^(-x)
+  trans_new(paste0("reverselog-", format(base)), trans, inv, 
+            log_breaks(base = base), 
+            domain = c(1e-100, Inf))
+}
 
 # timestep function - discrete time speciation
 timestep <- function(clades, t, q, EE){
@@ -128,4 +168,4 @@ p3
 
 
 fig3_dir <- paste(figure_dir, "/CladeRatesMassExtinction.png",sep = "")
-ggsave(plot = p3, filename = fig3_dir, width = 7, height = 5)
+# ggsave(plot = p3, filename = fig3_dir, width = 7, height = 5)

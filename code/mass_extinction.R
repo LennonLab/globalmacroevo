@@ -1,20 +1,19 @@
+## mass_extinction.R
+## Ford Fishman
+
 ## Modeling impacts of mass extiction on microbial diversity
 ## Incoroporates estimates of host-associated taxa from EMP
-## Ford Fishman
 
 library(ggplot2)
 library(tidyr)
 library(here)
 library(stringr)
-library(ggpubr)
 library(cowplot)
 
 # Load packages and functions, set environment
-
 setwd(here())
 source("code/functions.R")
 figure_dir <- "figures/"
-
 
 # Mass extinction events
 GOE <- 2450
@@ -24,19 +23,26 @@ PermianTriassic <- 252
 TriassicJurassic <- 201
 CretaceousPaleogene <- 66
 
-
+# create data frame
 EE <- c(OrdovicianSilurian, LateDevonian, PermianTriassic,TriassicJurassic, CretaceousPaleogene)
-EE_labels <- c('O-S', 'D', 'P-Tr','Tr-J', 'K-T')
+EE_labels <- c('OS', 'D', 'PTr','TrJ', 'KT')
 df_EE <- data.frame(year=c(GOE, EE), event=c('GOE',EE_labels))
+df_EE$label <- df_EE$year + c(0, 25, -10, 19, -12, 0)
 
+# returns if a timestep is a host-based mass extinction event
 inEE <- function(mya, EE.=EE){
   return(mya %in% EE.)
 }
 
+# returns if a timestep is a mass extinction event
 GOEorEE <- function(mya, EE=EE,GOE=GOE){
   return(mya==GOE|inEE(mya))
 }
 
+# simulation function
+# q_min = proportion of taxa vulnerable to mass extinction
+# lambda = speciation rate
+# ep = relative extinction rate (epsilon)
 ext_sim <- function(q_min,lambda=0.015,ep=0.5){
 
   mu <- lambda * ep 
@@ -59,7 +65,7 @@ ext_sim <- function(q_min,lambda=0.015,ep=0.5){
       }
       
       
-    } else {
+    } else { # if not a mass extinction event, set p to 0
       
       p <- rep(0,3) 
     }
@@ -69,37 +75,45 @@ ext_sim <- function(q_min,lambda=0.015,ep=0.5){
     S3[t] <- S3[t-1]*exp(r)*(1-q*p[3])
     # S4[t] <- S4[t-1]*exp(r)*(1-q*p[4])
   }
+  # store info in data frame
   df1 <- data.frame(zero = S1, fifty = S2, ninety = S3, mya=4000:1)
-  
+  # convert to long format
   df2 <- gather(df1, key = "intensity", value = "richness",-mya)
   
   df2$intensity <- str_replace(df2$intensity, 'zero', '0%')
-  # df2$intensity <- str_replace(df2$intensity, 'ten', '10%')
   df2$intensity <- str_replace(df2$intensity, 'fifty', '50%')
   df2$intensity <- str_replace(df2$intensity, 'ninety', '90%')
   
   return(subset(df2, mya>=10))
 }
 
+# annotation styling
+params1 <- as.expression(substitute(italic(q) == 1*","~~lambda == 0.015*","~~epsilon == 0.5,))
+annotation_p <- as.expression(substitute("Extinction\nintensity ("*italic(p)*")"))
 
+# q = 1
 p1 <- ext_sim(q_min = 1.0) %>%
 
   ggplot( aes(x = mya, y = log10(richness), group = intensity)) +  
   geom_line(aes(linetype = intensity)) +
   scale_x_continuous("Mya", trans = reverselog_trans(10), breaks = c(4000, 1000, 100, 10), limits=c(4000, 8)) +
-  scale_y_continuous("Taxon Diversity", breaks = c(3, 6, 9, 12), expand = c(0,0),labels = math_format(10^.x), limits = c(0,15)) +
+  scale_y_continuous("Species diversity", breaks = c(3, 6, 9, 12), expand = c(0,0),labels = math_format(10^.x), limits = c(0,15)) +
   
   scale_linetype_manual("Taxa removed by each event", 
                         values = c("solid", "dotted", "dashed"),
                         labels = c("0%", "50%", "90%")) +
   annotation_logticks(sides = "b") +
-  geom_text(data = subset(ext_sim(q_min = 1.0), mya==10),aes(label = intensity), x = Inf, hjust = 1, size =3)+
-  geom_text(data=df_EE, aes(x=year,y = 14.5,label = event),size=2, inherit.aes = F)+
+  geom_text(data = subset(ext_sim(q_min = 1.0), mya==10),aes(label = intensity), x = Inf, hjust = 1, size =4)+
+  geom_text(data=df_EE, aes(x=label,y = 14.5,label = event),size=3.5, inherit.aes = F)+
+  annotate(geom="text",x=12, y=14.2, label=annotation_p, hjust = 0)+
   geom_segment(data=df_EE,aes(x = year, xend = year, y = 0, yend=14),size = 4, alpha = 0.4, inherit.aes = F) +
+  coord_cartesian(xlim = c(4000,8), ylim = c(0, 15), clip = "off") +
+  ggtitle(params1) +
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
         panel.background = element_blank(),
         legend.position = "none",
+        plot.title = element_text(hjust = 0.5),
         axis.text = element_text(size = 12),
         axis.title = element_text(size = 14, face = "bold"),
         axis.line = element_line(colour = "black"),
@@ -108,23 +122,31 @@ p1 <- ext_sim(q_min = 1.0) %>%
   )
 p1
 
+params2 <- as.expression(substitute(italic(q) == 0.1*","~~lambda == 0.015*","~~epsilon == 0.5,))
+
+# q = 0.1
+
 p2 <- ext_sim(q_min = 0.1) %>%
   ggplot(aes(x = mya, y = log10(richness), group = intensity)) +  
   geom_line(aes(linetype = intensity)) +
   scale_x_continuous("Mya", trans = reverselog_trans(10), breaks = c(4000, 1000, 100, 10), limits=c(4000, 8)) +
-  scale_y_continuous("Taxon Diversity", breaks = c(3, 6, 9, 12), expand = c(0,0),labels = math_format(10^.x), limits = c(0,15)) +
+  scale_y_continuous("Species diversity", breaks = c(3, 6, 9, 12), expand = c(0,0),labels = math_format(10^.x), limits = c(0,15)) +
   
   scale_linetype_manual("Taxa removed by each event", 
                         values = c("solid", "dotted", "dashed"),
                         labels = c("0%", "50%", "90%")) +
   annotation_logticks(sides = "b") +
-  geom_text(data = subset(ext_sim(q_min = 0.1), mya==10),aes(label = intensity), x = Inf, hjust = 1, size = 3)+
-  geom_text(data=df_EE, aes(x=year,y = 14.5,label = event),size=2, inherit.aes = F)+
+  geom_text(data = subset(ext_sim(q_min = 0.1), mya==10),aes(label = intensity, y = c(13.1,12.5,11.8)),x=Inf, hjust = 1,size = 4 )+
+  geom_text(data=df_EE, aes(x=label,y = 14.5,label = event),size=3.5, inherit.aes = F)+
+  annotate(geom="text",x=12, y=14.2, label=annotation_p, hjust = 0)+
   geom_segment(data=df_EE,aes(x = year, xend = year, y = 0, yend=14),size = 4, alpha = 0.4, inherit.aes = F) +
+  coord_cartesian(xlim = c(4000,8), ylim = c(0, 15), clip = "off") +
+  ggtitle(params2) +
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
         panel.background = element_blank(),
         legend.position = "none",
+        plot.title = element_text(hjust = 0.5),
         axis.text = element_text(size = 12),
         axis.title = element_text(size = 14, face = "bold"),
         axis.line = element_line(colour = "black"),
@@ -139,32 +161,37 @@ library('purrr')
 library('viridis')
 
 
-rel_ext <- function(lam, mag, q, p){
-  return(1 - log(10^mag*(1-p)^-1*(1-q*p)^-5)/(lam*3999))
-  
-}
-
-heatmap_S <- function(q, p){
-  lam <- seq(0.002, 0.032, 0.00001)
+contour_plot <- function(q, p){
+  lam <- seq(0.004, 0.030, 0.00001)
   df <- data.frame(lam) # initialize dataframe
-
-  pal <- viridis_pal()(7)
-
   
-  for (i in 2:6){
+  pal <- viridis_pal()(8)
+  auc <- c()
+  
+  
+  for (i in 2:7){
     
     mag <- i*3
     
     # 10^mag is E(S_t)
-    ext <- rel_ext(lam, mag, q, p)
+    rel_ext <- function(lam) 1 - log(10^mag*(1-p)^-1*(1-q*p)^-5)/(lam*3999)
+
+    ext <- rel_ext(lam)
+
     
     # column bind to data frame
     df <- cbind(df,ext)
     names(df)[i] <- paste0("ep",mag)
   }
   
-  ep23 <- rel_ext(lam, 23, q, p)
-  df <- cbind(df,ep23)
+  rel_ext <- function(lam) 1 - log(10^23*(1-p)^-1*(1-q*p)^-5)/(lam*3999)
+  df <- cbind(df,rel_ext(lam))
+  names(df)[ncol(df)] <- paste0("ep","23")
+  
+  
+  params <- as.expression(substitute(italic(p) == a*","~~italic(q) == b,
+                                     list(a = format(p),
+                                          b = format(q))))
   
   p <- ggplot(df) +
       geom_area(aes(x=lam,y=ep6), fill=pal[2])+
@@ -172,18 +199,21 @@ heatmap_S <- function(q, p){
       geom_area(aes(x=lam,y=ep12), fill=pal[4])+
       geom_area(aes(x=lam,y=ep15), fill=pal[5])+
       geom_area(aes(x=lam,y=ep18), fill=pal[6])+
-      geom_area(aes(x=lam,y=ep23), fill=pal[7])+
-      scale_x_continuous(expression(""*lambda*" (Species/Myr)"),
-                         limits=c(0.002, 0.032),
+      geom_area(aes(x=lam,y=ep21), fill=pal[7])+
+      geom_area(aes(x=lam,y=ep23), fill=pal[8])+
+      scale_x_continuous(expression(bold("Speciation rate, "*lambda* " "(My^-1))),
+                         limits=c(0.004, 0.030),
                          breaks=seq(0.005, 0.03, 0.005),
                          expand = c(0,0)) +
-      scale_y_continuous("\u03B5", 
-                         limits = c(0.0, 0.92),
+      scale_y_continuous("Relative extinction rate, \u03B5", 
+                         limits = c(0.0, 1.0),
                          breaks = c(0.1, 0.3, 0.5, 0.7, 0.9), 
                          expand = c(0,0)) +
+      ggtitle(params) +
       theme(panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
             panel.background = element_rect(fill=pal[1]),
+            plot.title = element_text(hjust = 0.5),
             axis.text = element_text(size = 12),
             axis.ticks = element_line(size = 1),
             axis.ticks.length = unit(5,"pt"),
@@ -194,9 +224,10 @@ heatmap_S <- function(q, p){
   return(p)
 }
 
+# create plots
+p3 <- contour_plot(q=1, p=0.9)
+p4 <- contour_plot(q=0.1, p=0.9)
 
-p3 <- heatmap_S(q=1, p=0.9)
-p4 <- heatmap_S(q=0.1, p=0.9)
-
-fig_dir <- paste0(figure_dir, "fig2.png")
-plot_grid(p1, p3, p2, p4, align = "hv",labels = "auto", ncol=2, rel_widths = c(1.2,1)) %>% ggsave2(filename = fig_dir, width = 12, height = 8)
+# combine and save figures
+fig_dir <- paste0(figure_dir, "figure2.png")
+plot_grid(p1, p3, p2, p4, align = "hv",labels = "auto", ncol=2, rel_widths = c(1.2,1)) %>% ggsave2(filename = fig_dir, width = 12, height = 8.5)
