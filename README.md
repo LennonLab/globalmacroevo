@@ -20,7 +20,7 @@ Code that takes Earth Microbiome Project (EMP) data on species and sites to dete
 
 EMP metadata: `/data/EMP/emp_qiime_mapping_release1_20170912.tsv`
 
-EMP biom table:  https://zenodo.org/record/890000
+EMP biom table:   emp_deblur_90bp.release1.biom (download at [https://zenodo.org/record/890000](https://zenodo.org/record/890000]))
 
 EMP job script: `/code/emp.script`
 
