@@ -11,7 +11,7 @@ library(stringr)
 library(cowplot)
 
 # Load packages and functions, set environment
-setwd(here())
+# setwd(here())
 source("code/functions.R")
 figure_dir <- "figures/"
 
@@ -193,6 +193,8 @@ contour_plot <- function(q, p){
                                      list(a = format(p),
                                           b = format(q))))
   
+  
+  
   p <- ggplot(df) +
       geom_area(aes(x=lam,y=ep6), fill=pal[2])+
       geom_area(aes(x=lam,y=ep9), fill=pal[3])+
@@ -225,8 +227,25 @@ contour_plot <- function(q, p){
 }
 
 # create plots
-p3 <- contour_plot(q=1, p=0.9)
-p4 <- contour_plot(q=0.1, p=0.9)
+p3 <- contour_plot(q=1, p=0.9) + 
+  annotate(geom="text", label='10^5',x=0.011, y = 0.58, color = 'white', size = 3, parse=TRUE) +
+  annotate(geom="text", label='10^6',x=0.014, y = 0.45, color = 'white', size = 3, parse=TRUE) +
+  annotate(geom="text", label='10^9',x=0.0155, y = 0.39, color = 'white', size = 3, parse=TRUE) +
+  annotate(geom="text", label='10^12',x=0.0168, y = 0.33, color = 'white', size = 3, parse=TRUE) +
+  annotate(geom="text", label='10^15',x=0.018, y = 0.28, color = 'white', size = 3, parse=TRUE) +
+  annotate(geom="text", label='10^18',x=0.019, y = 0.23, color = 'white', size = 3, parse=TRUE) +
+  annotate(geom="text", label='10^21',x=0.0198, y = 0.19, color = 'white', size = 3, parse=TRUE) +
+  annotate(geom="text", label='10^23',x=0.021, y = 0.14, color = 'black', size = 3, parse=TRUE) 
+p4 <- contour_plot(q=0.1, p=0.9) +
+  annotate(geom="text", label='10^5',x=0.0095, y = 0.71, color = 'white', size = 3, parse=TRUE) +
+  annotate(geom="text", label='10^6',x=0.012, y = 0.59, color = 'white', size = 3, parse=TRUE) +
+  annotate(geom="text", label='10^9',x=0.0135, y = 0.50, color = 'white', size = 3, parse=TRUE) +
+  annotate(geom="text", label='10^12',x=0.015, y = 0.43, color = 'white', size = 3, parse=TRUE) +
+  annotate(geom="text", label='10^15',x=0.016, y = 0.37, color = 'white', size = 3, parse=TRUE) +
+  annotate(geom="text", label='10^18',x=0.0172, y = 0.31, color = 'white', size = 3, parse=TRUE) +
+  annotate(geom="text", label='10^21',x=0.0181, y = 0.26, color = 'white', size = 3, parse=TRUE) +
+  annotate(geom="text", label='10^23',x=0.0198, y = 0.19, color = 'black', size = 3, parse=TRUE) 
+
 
 # combine and save figures
 fig_dir <- paste0(figure_dir, "figure2.png")
