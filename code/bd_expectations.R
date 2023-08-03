@@ -15,9 +15,8 @@ library(here)
 library(cowplot)
 
 # Directory information
-wd <- here()
-data_dir <- paste0(wd, "/data/")
-figure_dir <- paste0(wd, "/figures/")
+wd <- here() # project directory
+figure_dir <- here("figures")
 
 ######## panel a #############
 # Levels of diversity across speciation and extinction rates
@@ -80,9 +79,9 @@ pA <- ggplot(dfA) +
   geom_area(aes(x=lam,y=ep18), fill=pal[6])+
   geom_area(aes(x=lam,y=ep21), fill=pal[7])+
   geom_area(aes(x=lam,y=ep23), fill=pal[8])+
-  annotate(geom="text", label='10^5',x=0.008, y = y1(0.008), color = 'white', size = 5, parse=TRUE) +
-  annotate(geom="text", label=labels,x=xs, y = ys, color = 'white', size = 5, parse=TRUE) +
-  annotate(geom="text", label='10^23',x=0.023, y = y1(0.023), color = 'black', size = 5, parse=TRUE) +
+  annotate(geom="text", label='10^5',x=0.008, y = y1(0.008), color = 'white', size = 5.5, parse=TRUE) +
+  annotate(geom="text", label=labels,x=xs, y = ys, color = 'white', size = 5.5, parse=TRUE) +
+  annotate(geom="text", label='10^23',x=0.023, y = y1(0.023), color = 'black', size = 5.5, parse=TRUE) +
   scale_x_continuous(expression(bold("Speciation rate, "*lambda* " "(My^-1))),
                      limits=c(0.004, 0.030),
                      breaks=seq(0.005, 0.03, 0.005),
@@ -94,13 +93,13 @@ pA <- ggplot(dfA) +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.background = element_rect(fill=pal[1]),
-        axis.text = element_text(size = 12),
+        axis.text = element_text(size = 14),
         axis.ticks = element_line(size = 1),
         axis.ticks.length = unit(5,"pt"),
         legend.position = "right",
-        legend.text = element_text(size = 12),
+        legend.text = element_text(size = 14),
         legend.text.align = 1,
-        axis.title = element_text(size = 14, face = "bold"),
+        axis.title = element_text(size = 16, face = "bold"),
         plot.margin = unit(c(1,2,1,1), "lines"))
 
 
@@ -161,19 +160,19 @@ palB <- pal[2:7]
                        # limits=c(0.0035, 0.032),
                        breaks=seq(0.005, 0.03, 0.005),
                        expand = c(0,0)) +
-    annotate(geom="text", label='10^6',x=0.011, y = 0.85, color = 'white', size = 5, parse=TRUE) +
-    annotate(geom="text", label='10^9',x=0.012, y = 0.67, color = 'white', size = 5, parse=TRUE) +
-    annotate(geom="text", label='10^12',x=0.013, y = 0.52, color = 'white', size = 5, parse=TRUE) +
-    annotate(geom="text", label='10^15',x=0.014, y = 0.35, color = 'white', size = 5, parse=TRUE) +
-    annotate(geom="text", label='10^18',x=0.015, y = 0.20, color = 'white', size = 5, parse=TRUE) +
-    annotate(geom="text", label='10^21',x=0.016, y = 0.07, color = 'white', size = 5, parse=TRUE) +
+    annotate(geom="text", label='10^6',x=0.011, y = 0.85, color = 'white', size = 5.5, parse=TRUE) +
+    annotate(geom="text", label='10^9',x=0.012, y = 0.67, color = 'white', size = 5.5, parse=TRUE) +
+    annotate(geom="text", label='10^12',x=0.013, y = 0.52, color = 'white', size = 5.5, parse=TRUE) +
+    annotate(geom="text", label='10^15',x=0.014, y = 0.35, color = 'white', size = 5.5, parse=TRUE) +
+    annotate(geom="text", label='10^18',x=0.015, y = 0.20, color = 'white', size = 5.5, parse=TRUE) +
+    annotate(geom="text", label='10^21',x=0.016, y = 0.07, color = 'white', size = 5.5, parse=TRUE) +
     theme(panel.grid.major = element_blank(), 
           panel.grid.minor = element_blank(),
           panel.background = element_blank(),
           legend.position = "none",
-          axis.text = element_text(size = 12),
+          axis.text = element_text(size = 14),
           axis.line = element_line(colour = "black"),
-          axis.title = element_text(size = 14, face = "bold"),
+          axis.title = element_text(size = 16, face = "bold"),
           plot.margin = unit(c(1,2,1,1), "lines"))
 )
 
@@ -242,12 +241,12 @@ pC <- ggplot(dfC, aes(x=mags, y=E_S)) +
          theme(panel.grid.major = element_blank(), 
                panel.grid.minor = element_blank(),
                panel.background = element_blank(),
-               axis.text = element_text(size = 12),
+               axis.text = element_text(size = 14),
                axis.line = element_line(colour = "black"),
-               axis.title = element_text(size = 14, face = "bold"))
+               axis.title = element_text(size = 16, face = "bold"))
 
 
 # Save figures and combine
-fig1_dir <- paste(figure_dir, "figure1_full.png", sep = "")
-plot_grid(pA, pB, pC, align = "hv",labels = "auto", ncol=1)  %>% ggsave2(filename = fig1_dir, width = 6, height = 12)
+fig1_dir <- paste(figure_dir, "figure1.pdf", sep = "")
+plot_grid(pA, pB, pC, align = "hv",labels = "auto", ncol=1)  %>% ggsave2(filename = fig1_dir, units="mm",width = 180, height = 360, dpi = 1000)
 
